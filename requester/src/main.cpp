@@ -343,14 +343,11 @@ int main(int argc, char **argv)
 				printf("Destination: %s %u\n",
 					   inet_ntoa(sender_addr.sin_addr),
 					   ntohs(sender_addr.sin_port));
+				printf("added packet to list with sequence number: %d\n\n", recv_packet->seq());
 			}
 
 			// add packet to vector
 			packets_list.push_back(Super_Packet(recv_packet, curr_time));
-
-			if (debug){
-				printf("added packet to list with sequence number: %d\n", recv_packet->seq());
-			}
 		}
 		else if (recv_packet->type() == 'E')
 		{
@@ -361,15 +358,11 @@ int main(int argc, char **argv)
 				printf("Destination: %s %u\n",
 					   inet_ntoa(sender_addr.sin_addr),
 					   ntohs(sender_addr.sin_port));
+				printf("added packet to list with sequence number: %d\n\n", recv_packet->seq());
 			}
 
 			// add packet to vector
 			packets_list.push_back(Super_Packet(recv_packet, curr_time));
-
-			if (debug){
-				printf("added packet to list with sequence number: %d\n", recv_packet->seq());
-			}
-
 			num_active_senders--;
 		}
 		else
@@ -381,13 +374,10 @@ int main(int argc, char **argv)
 				printf("Destination: %s %u\n",
 					   inet_ntoa(sender_addr.sin_addr),
 					   ntohs(sender_addr.sin_port));
-				printf("Unexpected packet was dropped\n");
+				printf("Unexpected packet was dropped\n\n");
 				// Print packet contents
 			}
 		}
-
-
-
 	}
 
 	// sort packets by sequence number :)
@@ -399,8 +389,8 @@ int main(int argc, char **argv)
 
 		for (int i = 0; i < packets_list.size(); i++)
 		{
-			printf("index:%d, seq_no: %d\n", i, packets_list.at(i).packet->seq());
 			packets_list.at(i).print();
+			printf("\n");
 		}
 	}
 
@@ -473,13 +463,14 @@ int main(int argc, char **argv)
 
 
 	// Print out to file
-	 std::ofstream myfile;
-	  myfile.open (file_option);
-	for (int i = 0; i < packets_list.size(); i++){
+	std::ofstream myfile;
+	myfile.open (file_option);
+	for (unsigned int i = 0; i < packets_list.size(); i++)
+	{
 		myfile << packets_list.at(i).packet->payload();
 	}
-	  //myfile << "Writing this to a file.\n";
-	  myfile.close();
+	//myfile << "Writing this to a file.\n";
+	myfile.close();
 
 
 

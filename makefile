@@ -43,7 +43,7 @@ run2: all
 	@echo 'Run sender1'
 	cd test/sender1 && ../../sender/Default/sender -p 5052 -g 5050 -r 1 -q 0 -l 8 -d debug >> sender1.txt &
 	@echo 'Run sender2'
-	cd test/sender2 && ../../sender/Default/sender -p 5053 -g 5050 -r 1 -q 0 -l 8 -d debug >> sender2.txt &
+	cd test/sender2 && ../../sender/Default/sender -p 5053 -g 5050 -r 1 -q 1000 -l 7 -d debug >> sender2.txt &
 	sleep 1
 	@echo 'Run requester'
 	cd test/requester && ../../requester/Default/requester -p 5050 -o split.txt -d debug >> requester.txt &

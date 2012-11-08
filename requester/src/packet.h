@@ -47,6 +47,12 @@ struct Packet
 			   payload());
 	}
 
+	// Assumes length < MAX_DATA
+	void clear(unsigned int length)
+	{
+		bzero(values_, length);
+	}
+
 private:
 	char values_[MAX_DATA];
 };

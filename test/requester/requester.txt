@@ -14,95 +14,136 @@ Packet being sent:
 R 0 0
 
 Destination: 128.105.112.9 5053
-Raw payload: split.txt
+Raw payload: split.txt”
 Packet sent
 The port is 5050
 Requester waiting for sender on port 5050
 Packet received:
-D 0 8
-This is 
-2012-11-07 18:59:14
+D 1000 7
+This is
+2012-11-07 19:43:37
 Destination: 128.105.112.9 5053
-added packet to list with sequence number: 0
+added packet to list with sequence number: 1000
+
 Packet received:
 D 8 8
  split1.
-2012-11-07 18:59:15
+2012-11-07 19:43:38
 Destination: 128.105.112.9 5052
 added packet to list with sequence number: 8
+
 Packet received:
-D 8 8
-split2.t
-2012-11-07 18:59:15
+D 1007 7
+ split2
+2012-11-07 19:43:38
 Destination: 128.105.112.9 5053
-added packet to list with sequence number: 8
+added packet to list with sequence number: 1007
+
 Packet received:
 D 16 7
 txt.
 *
-.
-2012-11-07 18:59:16
+
+2012-11-07 19:43:39
 Destination: 128.105.112.9 5052
 added packet to list with sequence number: 16
+
 Packet received:
-D 16 4
-xt.
-t2.t
-2012-11-07 18:59:16
+D 1014 6
+.txt.
+
+2012-11-07 19:43:39
 Destination: 128.105.112.9 5053
-added packet to list with sequence number: 16
+added packet to list with sequence number: 1014
+
 Packet received:
 E 24 0
 
-2012-11-07 18:59:17
+2012-11-07 19:43:40
 Destination: 128.105.112.9 5052
 added packet to list with sequence number: 24
-Packet received:
-E 24 0
 
-2012-11-07 18:59:17
+Packet received:
+E 253 0
+
+2012-11-07 19:43:40
 Destination: 128.105.112.9 5053
-added packet to list with sequence number: 24
+added packet to list with sequence number: 253
+
 
 DEBUG
 
-index:0, seq_no: 0
-D 0 8
-This is 
-seconds: 1352336354
-index:1, seq_no: 8
+D 1000 7
+This is
+seconds: 1352339017
+
 D 8 8
  split1.
-seconds: 1352336355
-index:2, seq_no: 8
-D 8 8
-split2.t
-seconds: 1352336355
-index:3, seq_no: 16
+seconds: 1352339018
+
+D 1007 7
+ split2
+seconds: 1352339018
+
 D 16 7
 txt.
 *
-.
-seconds: 1352336356
-index:4, seq_no: 16
-D 16 4
-xt.
-t2.t
-seconds: 1352336356
-index:5, seq_no: 24
+
+seconds: 1352339019
+
+D 1014 6
+.txt.
+
+seconds: 1352339019
+
 E 24 0
 
-seconds: 1352336357
-index:6, seq_no: 24
+seconds: 1352339020
+
+E 253 0
+
+seconds: 1352339020
+
+
+DEBUG
+
+D 8 8
+ split1.
+seconds: 1352339018
+
+D 16 7
+txt.
+*
+
+seconds: 1352339019
+
 E 24 0
 
-seconds: 1352336357
+seconds: 1352339020
+
+E 253 0
+
+seconds: 1352339020
+
+D 1000 7
+This is
+seconds: 1352339017
+
+D 1007 7
+ split2
+seconds: 1352339018
+
+D 1014 6
+.txt.
+
+seconds: 1352339019
+
 
 BEGIN SUMMARY
 
 Total data packets received: 7
 total data bytes received: 35
-average seconds for sender 1: 0.500000
+average seconds for sender 1: 1.000000
 average seconds for sender 2: 3.000000
-duration of entire test: 3 seconds
-2012-11-07 18:59:17
+duration of entire test: 2 seconds
+2012-11-07 19:43:40

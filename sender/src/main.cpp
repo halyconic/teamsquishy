@@ -189,7 +189,7 @@ int main(int argc, char **argv)
 					recv_packet.length());
 			printf("Bytes read: %d\n", bytes_read);
 			printf("Payload: %s\n", recv_packet.payload());
-		    printf("Origin: %s %u\n",
+		    printf("Origin: %s %u\n\n",
 				   inet_ntoa(requester_addr.sin_addr),
 				   ntohs(requester_addr.sin_port));
 		}
@@ -227,6 +227,8 @@ int main(int argc, char **argv)
 				if (debug)
 					printf("Beginning to read from file.\n");
 
+				send_packet.clear(length + MAX_HEADER);
+
 				send_packet.type() = 'D';
 				send_packet.seq() = seq_no;
 				filestr.read(send_packet.payload(), length);
@@ -241,7 +243,7 @@ int main(int argc, char **argv)
 								send_packet.seq(),
 								send_packet.length());
 						printf("Payload: %s\n", send_packet.payload());
-						printf("Destination: %s %u\n",
+						printf("Destination: %s %u\n\n",
 							   inet_ntoa(requester_addr.sin_addr),
 							   ntohs(requester_addr.sin_port));
 					}
