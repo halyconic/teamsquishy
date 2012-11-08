@@ -1,0 +1,74 @@
+Entry acknowledged:
+hello.txt 3 mumble-09 5051
+IP lookup: mumble-09.cs.wisc.edu
+Packet being sent:
+R 0 0
+
+Destination: 128.105.112.9 5051
+Raw payload: hello.txt
+Packet sent
+The port is 5050
+Entry acknowledged:
+hello.txt 3 mumble-09 5051
+IP lookup: mumble-09.cs.wisc.edu
+Packet being sent:
+R 0 0
+
+Destination: 128.105.112.9 5051
+Raw payload: hello.txt
+Packet sent
+The port is 5050
+Requester waiting for sender on port 5050
+Packet received:
+D 0 8
+*This is
+2012-11-07 18:24:42
+Destination: 128.105.112.9 5051
+added packet to list with sequence number: 0
+Packet received:
+D 8 8
+ hello.t
+2012-11-07 18:24:43
+Destination: 128.105.112.9 5051
+added packet to list with sequence number: 8
+Packet received:
+D 16 4
+xt.
+lo.t
+2012-11-07 18:24:44
+Destination: 128.105.112.9 5051
+added packet to list with sequence number: 16
+Packet received:
+E 24 0
+
+2012-11-07 18:24:45
+Destination: 128.105.112.9 5051
+added packet to list with sequence number: 24
+
+DEBUG
+
+index:0, seq_no: 0
+D 0 8
+*This is
+seconds: 1352334282
+index:1, seq_no: 8
+D 8 8
+ hello.t
+seconds: 1352334283
+index:2, seq_no: 16
+D 16 4
+xt.
+lo.t
+seconds: 1352334284
+index:3, seq_no: 24
+E 24 0
+
+seconds: 1352334285
+
+BEGIN SUMMARY
+
+Total data packets received: 4
+total data bytes received: 20
+average seconds for sender 1: 0.750000
+duration of entire test: 3 seconds
+2012-11-07 18:24:45
