@@ -33,10 +33,10 @@ run: all
 	
 analyze:
 	@echo 'Open relevant logs'
-	gedit test/sender/sender.txt
-	gedit test/sender1/sender1.txt
-	gedit test/sender2/sender2.txt
-	gedit test/requester/requester.txt
-	gedit test/requester/hello.txt
-	gedit test/requester/split.txt
+	gedit test/sender/sender.txt &
+	gedit test/sender1/sender1.txt &
+	gedit test/sender2/sender2.txt &
+	gedit test/requester/requester.txt &
+	gedit test/requester/hello.txt &
+	gedit test/requester/split.txt &
 	@echo 'Done'
