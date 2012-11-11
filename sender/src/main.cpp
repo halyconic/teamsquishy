@@ -250,7 +250,7 @@ int main(int argc, char **argv)
 					sendto(sock, send_packet, packet_size, 0,
 							(struct sockaddr *) &requester_addr, sizeof(struct sockaddr));
 
-					seq_no += length;
+					seq_no += 1;
 					counter.wait();
 				}
 			}

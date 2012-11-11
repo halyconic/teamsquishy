@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <sys/time.h>
 #include <fstream>
+#include "time.h"
 
 const char* domain = ".cs.wisc.edu";
 
@@ -55,6 +56,18 @@ void printTime()
 	printf ("%04d-%02d-%02d %02d:%02d:%02d\n",
 		tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 		tm->tm_hour, tm->tm_min, tm->tm_sec);
+}
+
+double diff_us(timeval t1, timeval t2)
+{
+    return (double) (((t1.tv_sec - t2.tv_sec) * 1000000) +
+            (t1.tv_usec - t2.tv_usec));
+}
+
+double diff_ms(timeval t1, timeval t2)
+{
+    return (((t1.tv_sec - t2.tv_sec) * 1000000) +
+            (t1.tv_usec - t2.tv_usec))/1000.0;
 }
 
 int main(int argc, char **argv)
@@ -421,8 +434,10 @@ int main(int argc, char **argv)
 	// average packets/second (not working right now)
 
 	int senderNumber = 1;
-	int numPacketsAtSender = 0;
+	int numPacketsAtSender = 0.0;
 	float diff_time;
+	double avg_diff_ms;
+	double avg_diff_us;
 	Super_Packet next_packet = packets_list.at(0);
 	for (int i = 0; i < packets_list.size(); i++)
 	{
@@ -435,7 +450,13 @@ int main(int argc, char **argv)
 			numPacketsAtSender++;
 
 			diff_time = packets_list.at(i).time.tv_sec - begin_time.tv_sec;
-			printf("average seconds for sender %d: %f\n", senderNumber, diff_time/numPacketsAtSender);
+			//diff_time = diff_ms(packets_list.at(i).time, begin_time);
+
+
+			avg_diff_ms = ((double)diff_ms(packets_list.at(i).time, begin_time))/numPacketsAtSender;
+			avg_diff_us = ((double)diff_us(packets_list.at(i).time, begin_time))/numPacketsAtSender;
+			printf("average milliseconds for sender %d: %f\n", senderNumber, avg_diff_ms);
+			printf("average microseconds for sender %d: %f\n", senderNumber, avg_diff_us);
 
 			senderNumber++;
 			numPacketsAtSender = 0;
@@ -445,12 +466,15 @@ int main(int argc, char **argv)
 	}
 
 	// duration of the test
-	int begin = begin_time.tv_sec;
-	int end = packets_list.back().time.tv_sec;
-	printf("duration of entire test: %d seconds\n", end-begin);
+	double diff_time_ms = (double)diff_ms(packets_list.back().time, begin_time);
+	double diff_time_us = (double)diff_us(packets_list.back().time, begin_time);
+
+	printf("duration of entire test: %f milliseconds\n", diff_time_ms);
+	printf("duration of entire test: %f microseconds\n", diff_time_us);
 
 
 
+printf("hi\n");
 
 	time_t now;
 	struct tm *tm;
