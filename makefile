@@ -53,15 +53,17 @@ p1_2: all
 p2_t1: all
 	-cd test/emulator && rm emulator.txt
 	@echo 'Run emulator'
-	cd test/emulator && ../../emulator/Default/emulator -p 0 -q 0 -f 0 -l 0 -d debug >> emulator.txt &
+	cd test/emulator && ../../emulator/Default/emulator -p 0 -q 0 -f table.txt -l 0 -d debug >> emulator.txt &
 	@echo 'Done'
 	
 analyze:
 	@echo 'Open relevant logs'
+	gedit test/requester/tracker.txt &
 	gedit test/sender/sender.txt &
 	gedit test/sender1/sender1.txt &
 	gedit test/sender2/sender2.txt &
 	gedit test/requester/requester.txt &
 	gedit test/requester/hello.txt &
 	gedit test/requester/split.txt &
+	gedit test/emulator/emulator.txt &
 	@echo 'Done'

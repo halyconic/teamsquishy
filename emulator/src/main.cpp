@@ -128,10 +128,11 @@ int main(int argc, char **argv)
 
 	std::vector<ForwardEntry> forward_table = get_forwarding_table_from_file(forward_filename, debug);
 
-	if (debug)
+	if (0 && debug)
 	{
 		printf("Output entries:\n");
 		for (unsigned int i = 0; i < forward_table.size(); i++)
 			forward_table[i].print();
+		printf("\n");
 	}
 }
