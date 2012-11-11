@@ -10,6 +10,8 @@
 #include <stdlib.h> //exit
 #include <stdio.h>
 
+#include "forward.h"
+
 int main(int argc, char **argv)
 {
 	/*
@@ -27,8 +29,8 @@ int main(int argc, char **argv)
 
 	char* arg_port = NULL;				//p
 	char* arg_queue_size = NULL;		//q
-	char* arg_filename = NULL;			//f
-	char* arg_log = NULL;				//l
+	char* arg_forward_filename = NULL;	//f
+	char* arg_log_filename = NULL;		//l
 
 	// Our personal debug options
 	bool debug = false;					//d
@@ -45,10 +47,10 @@ int main(int argc, char **argv)
 			arg_queue_size = optarg;
 			break;
 		case 'f':
-			arg_filename = optarg;
+			arg_forward_filename = optarg;
 			break;
 		case 'l':
-			arg_log = optarg;
+			arg_log_filename = optarg;
 			break;
 		case 'd':
 			debug = true;
@@ -86,12 +88,12 @@ int main(int argc, char **argv)
 		printf("Please supply a queue size (Usage: -q <queue_size>).\n");
 		return 0;
 	}
-	else if (!arg_filename)
+	else if (!arg_forward_filename)
 	{
 		printf("Please supply a forwarding table filename (Usage: -f <filename>).\n");
 		return 0;
 	}
-	else if (!arg_log)
+	else if (!arg_log_filename)
 	{
 		printf("Please supply a log filename (Usage: -l <log>).\n");
 		return 0;
@@ -105,8 +107,8 @@ int main(int argc, char **argv)
 	unsigned long int queue_size = strtoul(arg_queue_size, NULL, 0);
 
 	// Aliases
-	char* filename = arg_filename;
-	char* log = arg_log;
+	char* forward_filename = arg_forward_filename;
+	char* log_filename = arg_log_filename;
 
 	/*
 	 * Verify variables are within the correct range
@@ -118,5 +120,18 @@ int main(int argc, char **argv)
 	{
 		printf("Please supply a port number between 1025 and 65535.\n");
 		return 0;
+	}
+
+	/*
+	 * Build forwarding table
+	 */
+
+	std::vector<ForwardEntry> forward_table = get_forwarding_table_from_file(forward_filename, debug);
+
+	if (debug)
+	{
+		printf("Output entries:\n");
+		for (unsigned int i = 0; i < forward_table.size(); i++)
+			forward_table[i].print();
 	}
 }

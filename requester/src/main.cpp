@@ -218,7 +218,9 @@ int main(int argc, char **argv)
 	sender_addr.sin_family = AF_INET;
 	addr_len = sizeof(struct sockaddr);
 
-	// Set up receive
+	/*
+	 * Set up receive
+	 */
 
 	if (debug)
 	{
@@ -301,7 +303,7 @@ int main(int argc, char **argv)
 			bzero(&(sender_addr.sin_zero), 8);
 
 			// Form packet
-			Packet send_packet;
+			L1Packet send_packet;
 			send_packet.type() = 'R';
 			send_packet.seq() = 0;
 			send_packet.length() = 0;

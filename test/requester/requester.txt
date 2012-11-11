@@ -12,14 +12,14 @@ Requester waiting for sender on port 5050
 Packet received:
 D 0 8
 *This is
-2012-11-11 13:35:45
+2012-11-11 16:03:51
 Destination: 128.105.112.34 5051
 added packet to list with sequence number: 0
 
 Packet received:
 D 8 8
  hello.t
-2012-11-11 13:35:46
+2012-11-11 16:03:52
 Destination: 128.105.112.34 5051
 added packet to list with sequence number: 8
 
@@ -27,14 +27,14 @@ Packet received:
 D 16 4
 xt.
 
-2012-11-11 13:35:47
+2012-11-11 16:03:53
 Destination: 128.105.112.34 5051
 added packet to list with sequence number: 16
 
 Packet received:
 E 24 0
 
-2012-11-11 13:35:48
+2012-11-11 16:03:54
 Destination: 128.105.112.34 5051
 added packet to list with sequence number: 24
 
@@ -43,20 +43,20 @@ DEBUG
 
 D 0 8
 *This is
-seconds: 1352662545
+seconds: 1352671431
 
 D 8 8
  hello.t
-seconds: 1352662546
+seconds: 1352671432
 
 D 16 4
 xt.
 
-seconds: 1352662547
+seconds: 1352671433
 
 E 24 0
 
-seconds: 1352662548
+seconds: 1352671434
 
 
 BEGIN SUMMARY
@@ -65,4 +65,4 @@ Total data packets received: 4
 total data bytes received: 20
 average seconds for sender 1: 0.750000
 duration of entire test: 3 seconds
-2012-11-11 13:35:48
+2012-11-11 16:03:54

@@ -229,9 +229,9 @@ int main(int argc, char **argv)
 
 	if (1)
 	{
-		Packet send_packet, recv_packet;
+		L1Packet send_packet, recv_packet;
 
-		bytes_read = recvfrom(sock, recv_packet, MAX_DATA, 0,
+		bytes_read = recvfrom(sock, recv_packet, L1_HEADER + DEFAULT_PAYLOAD, 0,
 			(struct sockaddr *) &requester_addr, &addr_len);
 
 		if (debug)
@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 				if (debug)
 					printf("Beginning to read from file.\n");
 
-				send_packet.clear(length + MAX_HEADER);
+				send_packet.clear(length + L1_HEADER);
 
 				send_packet.type() = 'D';
 				send_packet.seq() = seq_no;
@@ -312,7 +312,7 @@ int main(int argc, char **argv)
 
 			filestr.close();
 
-			char buf_end_packet[MAX_HEADER] = {0};
+			char buf_end_packet[L1_HEADER] = {0};
 			buf_end_packet[0] = 'E';
 			buf_end_packet[1] = seq_no;
 
