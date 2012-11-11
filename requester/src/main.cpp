@@ -59,11 +59,9 @@ void printTime()
 
 int main(int argc, char **argv)
 {
-
-
-
-
-	// Handle arguments
+	/*
+	 * Handle arguments
+	 */
 
 	// If no commands, do nothing
 	if (argc <= 1)
@@ -76,12 +74,15 @@ int main(int argc, char **argv)
 
 	char* arg_port = NULL;				//p
 	char* arg_file_option = NULL;		//o
+	char* arg_emu_hostname = NULL;		//f
+	char* arg_emu_port = NULL;			//h
+	char* arg_window = NULL;			//w
 
 	// Our personal debug options
 	bool debug = false;					//d
 	char* arg_debug = NULL;				//d
 
-	while ((cmd = getopt(argc, argv, "p:o:d:")) != -1)
+	while ((cmd = getopt(argc, argv, "p:o:f:h:w:d:")) != -1)
 	{
 		switch (cmd)
 		{
@@ -91,12 +92,23 @@ int main(int argc, char **argv)
 		case 'o':
 			arg_file_option = optarg;
 			break;
+		case 'f':
+			arg_emu_hostname = optarg;
+			break;
+		case 'h':
+			arg_emu_port = optarg;
+			break;
+		case 'w':
+			arg_window = optarg;
+			break;
 		case 'd':
 			debug = true;
 			arg_debug = optarg;
 			break;
 		case '?':
-			if (optopt == 'p' || optopt == 'o' || optopt == 'd')
+			if (optopt == 'p' || optopt == 'o' ||
+				optopt == 'f' || optopt == 'h' || optopt == 'w' ||
+				optopt == 'd')
 				fprintf(stderr, "Option -%c requires an argument.\n", optopt);
 			else if (isprint(optopt))
 				fprintf(stderr, "Unknown option `-%c'.\n", optopt);
@@ -112,7 +124,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// Verify all required arguments are supplied here
+	/*
+	 * Verify all required arguments are supplied here
+	 */
 
 	if (!arg_port)
 	{
@@ -124,13 +138,39 @@ int main(int argc, char **argv)
 		printf("Please supply a file option (Usage: -o <file_option>).\n");
 		return 0;
 	}
+	else if (!arg_emu_hostname)
+	{
+		printf("Please supply a forwarding hostname (Usage: -f <f_hostname>).\n");
+		return 0;
+	}
+	else if (!arg_emu_port)
+	{
+		printf("Please supply a forwarding port (Usage: -h <f_port>).\n");
+		return 0;
+	}
+	else if (!arg_window)
+	{
+		printf("Please supply a packet window (Usage: -w <window>).\n");
+		return 0;
+	}
 
-	// Convert arguments to usable form
+	/*
+	 *  Convert arguments to usable form
+	 */
 
 	unsigned long int port = strtoul(arg_port, NULL, 0);
-	char* file_option = arg_file_option;                 // Alias
+	unsigned long int emu_port = strtoul(arg_emu_port, NULL, 0);
+	unsigned long int window = strtoul(arg_window, NULL, 0);
 
-	// Verify variables are within the correct range
+	// Aliases
+	char* file_option = arg_file_option;
+	char* emu_hostname = arg_emu_hostname;
+
+	/*
+	 * Verify variables are within the correct range
+	 *
+	 * TODO: test new params
+	 */
 
 	if (!debug && (port < 1024 || port > 65536))
 	{
@@ -138,7 +178,9 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	// Parse tracker.txt
+	/*
+	 * Parse tracker.txt
+	 */
 
 	std::vector<TrackerEntry> tracker = get_tracker_from_file("tracker.txt", debug);
 
@@ -176,7 +218,44 @@ int main(int argc, char **argv)
 	sender_addr.sin_family = AF_INET;
 	addr_len = sizeof(struct sockaddr);
 
-	// Make requests
+	// Set up receive
+
+	if (debug)
+	{
+		printf("The port is %lu\n", port);
+		fflush(stdout);
+	}
+
+	// Own address
+	requester_addr.sin_family = AF_INET;
+	requester_addr.sin_port = htons(port);// requester_addr.sin_port = htons(0);
+	requester_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	bzero(&(requester_addr.sin_zero), 8);
+
+	if ((recv_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+	// If talking to 'echo'
+	if (debug && strcmp(arg_debug, "echo") == 0)
+	{
+		printf("Echo mode: Listening for packet\n");
+		bytes_read = recvfrom(send_sock, recv_data, sizeof(recv_data), 0,
+			(struct sockaddr *) &sender_addr, &addr_len);
+	}
+
+	// Bind port to listen on
+	if (bind(recv_sock, (struct sockaddr *) &requester_addr, sizeof(struct sockaddr)) == -1)
+	{
+		perror("Bind");
+		exit(1);
+	}
+
+	/*
+	 * Make requests
+	 */
 
 	unsigned int num_active_senders = 0;
 	unsigned int number_of_parts = 0;
@@ -274,40 +353,9 @@ int main(int argc, char **argv)
 		return(0);
 	}
 
-	// Listen for packets (Listen until end packet)
-
-	if (debug)
-	{
-		printf("The port is %lu\n", port);
-		fflush(stdout);
-	}
-
-	// Own address
-	requester_addr.sin_family = AF_INET;
-	requester_addr.sin_port = htons(port);// requester_addr.sin_port = htons(0);
-	requester_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	bzero(&(requester_addr.sin_zero), 8);
-
-	if ((recv_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
-	{
-		perror("Socket");
-		exit(1);
-	}
-
-	// If talking to 'echo'
-	if (debug && strcmp(arg_debug, "echo") == 0)
-	{
-		printf("Echo mode: Listening for packet\n");
-		bytes_read = recvfrom(send_sock, recv_data, sizeof(recv_data), 0,
-			(struct sockaddr *) &sender_addr, &addr_len);
-	}
-
-	// Bind port to listen on
-	if (bind(recv_sock, (struct sockaddr *) &requester_addr, sizeof(struct sockaddr)) == -1)
-	{
-		perror("Bind");
-		exit(1);
-	}
+	/*
+	 * Listen for packets (Listen until end packet)
+	 */
 
 	if (debug)
 	{

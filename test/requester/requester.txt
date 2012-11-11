@@ -1,149 +1,68 @@
-Entry acknowledged:
-split.txt 1 mumble-09 5052
-IP lookup: mumble-09.cs.wisc.edu
-Packet being sent:
-R 0 0
-
-Destination: 128.105.112.9 5052
-Raw payload: split.txt
-Packet sent
-Entry acknowledged:
-split.txt 2 mumble-09 5053
-IP lookup: mumble-09.cs.wisc.edu
-Packet being sent:
-R 0 0
-
-Destination: 128.105.112.9 5053
-Raw payload: split.txt”
-Packet sent
 The port is 5050
+Entry acknowledged:
+hello.txt 3 mumble-34 5051
+IP lookup: mumble-34.cs.wisc.edu
+Packet being sent:
+R 0 0
+
+Destination: 128.105.112.34 5051
+Raw payload: hello.txt
+Packet sent
 Requester waiting for sender on port 5050
 Packet received:
-D 1000 7
-This is
-2012-11-07 19:43:37
-Destination: 128.105.112.9 5053
-added packet to list with sequence number: 1000
+D 0 8
+*This is
+2012-11-11 13:35:45
+Destination: 128.105.112.34 5051
+added packet to list with sequence number: 0
 
 Packet received:
 D 8 8
- split1.
-2012-11-07 19:43:38
-Destination: 128.105.112.9 5052
+ hello.t
+2012-11-11 13:35:46
+Destination: 128.105.112.34 5051
 added packet to list with sequence number: 8
 
 Packet received:
-D 1007 7
- split2
-2012-11-07 19:43:38
-Destination: 128.105.112.9 5053
-added packet to list with sequence number: 1007
+D 16 4
+xt.
 
-Packet received:
-D 16 7
-txt.
-*
-
-2012-11-07 19:43:39
-Destination: 128.105.112.9 5052
+2012-11-11 13:35:47
+Destination: 128.105.112.34 5051
 added packet to list with sequence number: 16
 
 Packet received:
-D 1014 6
-.txt.
-
-2012-11-07 19:43:39
-Destination: 128.105.112.9 5053
-added packet to list with sequence number: 1014
-
-Packet received:
 E 24 0
 
-2012-11-07 19:43:40
-Destination: 128.105.112.9 5052
+2012-11-11 13:35:48
+Destination: 128.105.112.34 5051
 added packet to list with sequence number: 24
 
-Packet received:
-E 253 0
-
-2012-11-07 19:43:40
-Destination: 128.105.112.9 5053
-added packet to list with sequence number: 253
-
 
 DEBUG
 
-D 1000 7
-This is
-seconds: 1352339017
+D 0 8
+*This is
+seconds: 1352662545
 
 D 8 8
- split1.
-seconds: 1352339018
+ hello.t
+seconds: 1352662546
 
-D 1007 7
- split2
-seconds: 1352339018
+D 16 4
+xt.
 
-D 16 7
-txt.
-*
-
-seconds: 1352339019
-
-D 1014 6
-.txt.
-
-seconds: 1352339019
+seconds: 1352662547
 
 E 24 0
 
-seconds: 1352339020
-
-E 253 0
-
-seconds: 1352339020
-
-
-DEBUG
-
-D 8 8
- split1.
-seconds: 1352339018
-
-D 16 7
-txt.
-*
-
-seconds: 1352339019
-
-E 24 0
-
-seconds: 1352339020
-
-E 253 0
-
-seconds: 1352339020
-
-D 1000 7
-This is
-seconds: 1352339017
-
-D 1007 7
- split2
-seconds: 1352339018
-
-D 1014 6
-.txt.
-
-seconds: 1352339019
+seconds: 1352662548
 
 
 BEGIN SUMMARY
 
-Total data packets received: 7
-total data bytes received: 35
-average seconds for sender 1: 1.000000
-average seconds for sender 2: 3.000000
-duration of entire test: 2 seconds
-2012-11-07 19:43:40
+Total data packets received: 4
+total data bytes received: 20
+average seconds for sender 1: 0.750000
+duration of entire test: 3 seconds
+2012-11-11 13:35:48
