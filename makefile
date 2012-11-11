@@ -26,7 +26,7 @@ clean:
 	-cd test/requester && rm hello.txt
 	-cd test/requester && rm split.txt
 
-run: all
+p1_1: all
 	-cd test/sender && rm sender.txt
 	-cd test/requester && rm requester.txt
 	@echo 'Run sender'
@@ -36,7 +36,7 @@ run: all
 	cd test/requester && ../../requester/Default/requester -p 5050 -o hello.txt -d debug >> requester.txt &
 	@echo 'Done'
 
-run2: all
+p1_2: all
 	-cd test/sender1 && rm sender1.txt
 	-cd test/sender2 && rm sender2.txt
 	-cd test/requester && rm requester.txt
@@ -47,6 +47,16 @@ run2: all
 	sleep 1
 	@echo 'Run requester'
 	cd test/requester && ../../requester/Default/requester -p 5050 -o split.txt -d debug >> requester.txt &
+	@echo 'Done'
+	
+p2_1: all
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 5051 -g 5050 -r 1 -q 0 -l 8 -d debug >> sender.txt &
+	@echo 'Run requester'
+	sleep 1
+	cd test/requester && ../../requester/Default/requester -p 5050 -o hello.txt -d debug >> requester.txt &
 	@echo 'Done'
 	
 analyze:
