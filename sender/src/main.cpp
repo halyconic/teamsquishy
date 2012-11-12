@@ -49,12 +49,16 @@ int main(int argc, char **argv)
 	char* arg_rate = NULL;				//r
 	char* arg_seq_no = NULL;			//q
 	char* arg_length = NULL;			//l
+	char* arg_emu_hostname = NULL;		//f
+	char* arg_emu_port = NULL;			//h
+	char* arg_priority = NULL;			//i
+	char* arg_timeout = NULL;			//t
 
 	// Our personal debug options
 	bool debug = false;					//d
 	char* arg_debug = NULL;				//d
 
-	while ((cmd = getopt(argc, argv, "p:g:r:q:l:d:")) != -1)
+	while ((cmd = getopt(argc, argv, "p:g:r:q:l:f:h:i:t:d:")) != -1)
 	{
 		switch (cmd)
 		{
@@ -73,12 +77,26 @@ int main(int argc, char **argv)
 		case 'l':
 			arg_length = optarg;
 			break;
+		case 'f':
+			arg_emu_hostname = optarg;
+			break;
+		case 'h':
+			arg_emu_port = optarg;
+			break;
+		case 'i':
+			arg_priority = optarg;
+			break;
+		case 't':
+			arg_timeout = optarg;
+			break;
 		case 'd':
 			debug = true;
 			arg_debug = optarg;
 			break;
 		case '?':
-			if (optopt == 'p' || optopt == 'g' || optopt == 'r' || optopt == 'q' || optopt == 'l' || optopt == 'd')
+			if (optopt == 'p' || optopt == 'g' || optopt == 'r' || optopt == 'q' || optopt == 'l' ||
+				optopt == 'f' || optopt == 'h' || optopt == 'i' || optopt == 't' ||
+				optopt == 'd')
 				fprintf (stderr, "Option -%c requires an argument.\n", optopt);
 			else if (isprint(optopt))
 				fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -121,25 +139,59 @@ int main(int argc, char **argv)
 		printf("Please supply a length (Usage: -l <length>).\n");
 		return 0;
 	}
+	else if (!arg_emu_hostname)
+	{
+		printf("Please supply a forwarding hostname (Usage: -f <f_hostname>).\n");
+		return 0;
+	}
+	else if (!arg_emu_port)
+	{
+		printf("Please supply a forwarding port (Usage: -h <f_port>).\n");
+		return 0;
+	}
+	else if (!arg_priority)
+	{
+		printf("Please supply a forwarding hostname (Usage: -f <f_hostname>).\n");
+		return 0;
+	}
+	else if (!arg_timeout)
+	{
+		printf("Please supply a forwarding port (Usage: -h <f_port>).\n");
+		return 0;
+	}
 
-	// Convert arguments to usable form
+	/*
+	 * Convert arguments to usable form
+	 */
 
 	unsigned long int sender_port = strtoul(arg_sender_port, NULL, 0);
 	unsigned long int requester_port = strtoul(arg_requester_port, NULL, 0);
-	double rate = strtoul(arg_rate, NULL, 0);
+	unsigned long int emu_port = strtoul(arg_emu_port, NULL, 0);
+	double rate = strtoul(arg_rate, NULL, 0); //TODO: more granularity
 	unsigned long int seq_no = strtoul(arg_seq_no, NULL, 0);
 	unsigned long int length = strtoul(arg_length, NULL, 0);
+	unsigned long int priority = strtoul(arg_priority, NULL, 0);
+	unsigned long int timeout = strtoul(arg_timeout, NULL, 0);
 
-	// Verify variables are within the correct range
+	// Aliases
+	char* emu_hostname = arg_emu_hostname;
+
+	/*
+	 * Verify variables are within the correct range
+	 *
+	 * TODO: test new params
+	 */
 
 	if (sender_port < 1024 || sender_port > 65536
 			|| requester_port < 1024 || requester_port > 65536)
 	{
 		printf("Please supply port numbers between 1025 and 65535.");
-		return(0);
+		return 0;
 	}
 
-	// Set up socket connection
+	/*
+	 * Set up socket connection
+	 */
 
 	int sock;
 	int bytes_read; // <- note how this is now on its own line!
@@ -168,16 +220,18 @@ int main(int argc, char **argv)
 
 	addr_len = sizeof(struct sockaddr);
 
-	// Listen for incoming requests
+	/*
+	 * Listen for incoming requests
+	 */
 
 	printf("Sender waiting for requester on port %ld\n", sender_port);
 	fflush(stdout);
 
 	if (1)
 	{
-		Packet send_packet, recv_packet;
+		L1Packet send_packet, recv_packet;
 
-		bytes_read = recvfrom(sock, recv_packet, MAX_DATA, 0,
+		bytes_read = recvfrom(sock, recv_packet, L1_HEADER + DEFAULT_PAYLOAD, 0,
 			(struct sockaddr *) &requester_addr, &addr_len);
 
 		if (debug)
@@ -189,7 +243,7 @@ int main(int argc, char **argv)
 					recv_packet.length());
 			printf("Bytes read: %d\n", bytes_read);
 			printf("Payload: %s\n", recv_packet.payload());
-		    printf("Origin: %s %u\n",
+		    printf("Origin: %s %u\n\n",
 				   inet_ntoa(requester_addr.sin_addr),
 				   ntohs(requester_addr.sin_port));
 		}
@@ -219,13 +273,14 @@ int main(int argc, char **argv)
 			filestr.seekg(0, std::ios::beg);
 
 			Counter counter = Counter(rate);
-			/*
-			 * CONTAIN IN WHILE LOOP
-			 */
+			//counter.wait();
+
 			while (filestr.good())
 			{
 				if (debug)
 					printf("Beginning to read from file.\n");
+
+				send_packet.clear(length + L1_HEADER);
 
 				send_packet.type() = 'D';
 				send_packet.seq() = seq_no;
@@ -241,7 +296,7 @@ int main(int argc, char **argv)
 								send_packet.seq(),
 								send_packet.length());
 						printf("Payload: %s\n", send_packet.payload());
-						printf("Destination: %s %u\n",
+						printf("Destination: %s %u\n\n",
 							   inet_ntoa(requester_addr.sin_addr),
 							   ntohs(requester_addr.sin_port));
 					}
@@ -254,26 +309,42 @@ int main(int argc, char **argv)
 					counter.wait();
 				}
 			}
-			/*
-			 * CONTAIN IN WHILE LOOP
-			 */
+
+			printf("end seq number: %d\n", seq_no);
 
 			filestr.close();
 
-			char buf_end_packet[MAX_HEADER] = {0};
-			buf_end_packet[0] = 'E';
-			buf_end_packet[1] = seq_no;
+			L1Packet end_packet = L1Packet(0);
+
+//			char buf_end_packet[L1_HEADER] = {0};
+//
+//			for (int i = 0; i < sizeof(buf_end_packet); i++)
+//			{
+//				printf("buff_end_packet: %d\n",buf_end_packet[0]);
+//			}
+
+//			buf_end_packet[0] = 'E';
+//			buf_end_packet[1] = seq_no;
+
+			end_packet.type() = 'E';
+			end_packet.seq() = seq_no;
+
+//			if (debug)
+//			{
+//				printf("End packet being sent:\n");
+//				printf("%c %d %d\n",
+//						buf_end_packet[0],
+//						(int)buf_end_packet[1],
+//						(int)buf_end_packet[5]);
+//			}
 
 			if (debug)
 			{
 				printf("End packet being sent:\n");
-				printf("%c %d %d\n",
-						buf_end_packet[0],
-						(int)buf_end_packet[1],
-						(int)buf_end_packet[5]);
+				end_packet.print();
 			}
 
-			sendto(sock, buf_end_packet, sizeof(buf_end_packet), 0,
+			sendto(sock, end_packet, L1_HEADER, 0,
 					(struct sockaddr *)&requester_addr, sizeof(struct sockaddr));
 		}
 		else
