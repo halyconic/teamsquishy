@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 	unsigned long int sender_port = strtoul(arg_sender_port, NULL, 0);
 	unsigned long int requester_port = strtoul(arg_requester_port, NULL, 0);
 	unsigned long int emu_port = strtoul(arg_emu_port, NULL, 0);
-	double rate = strtoul(arg_rate, NULL, 0); //TODO: more granularity
+	double rate = strtod(arg_rate, NULL); //TODO: more granularity
 	unsigned long int seq_no = strtoul(arg_seq_no, NULL, 0);
 	unsigned long int length = strtoul(arg_length, NULL, 0);
 	unsigned long int priority = strtoul(arg_priority, NULL, 0);

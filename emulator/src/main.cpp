@@ -10,7 +10,13 @@
 #include <stdlib.h> //exit
 #include <stdio.h>
 
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
+#include <queue>
+
 #include "forward.h"
+#include "packet.h"
 
 int main(int argc, char **argv)
 {
@@ -128,11 +134,147 @@ int main(int argc, char **argv)
 
 	std::vector<ForwardEntry> forward_table = get_forwarding_table_from_file(forward_filename, debug);
 
-	if (0 && debug)
+	if (debug)
 	{
 		printf("Output entries:\n");
 		for (unsigned int i = 0; i < forward_table.size(); i++)
 			forward_table[i].print();
 		printf("\n");
+	}
+
+	/*
+	1.     Receive packet from network in a non-blocking way. This means that you should not wait/get blocked in the recvfrom function until you get a packet. Check if you have received a packet; If not jump to 4,
+
+	2.     Once you receive a packet, decide whether packet is to be forwarded by consulting the forwarding table,
+
+	3.     Queue packet according to packet priority level if the queue is not full,
+
+	4.     If a packet is currently being delayed and the delay has not expired, goto Step 1.
+
+	5.     If no packet is currently being delayed, select the packet at the front of the queue with highest priority, remove that packet from the queue and delay it,
+
+	6.     When the delay expires, randomly determine whether to drop the packet,
+
+	7.     Otherwise, send the packet to the proper next hop.
+
+	8.     Goto Step 1.
+	 */
+
+	/*
+	 * Set up socket
+	 */
+
+	int sock;
+	int bytes_read; // <- note how this is now on its own line!
+	socklen_t addr_len; // <- and this too, with a different type.
+	int flags = MSG_DONTWAIT;
+
+	struct sockaddr_in emulator_addr;
+
+	// Own address
+	emulator_addr.sin_family = AF_INET;
+	emulator_addr.sin_port = htons(port);
+	emulator_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	bzero(&(emulator_addr.sin_zero), 8);
+
+	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+	addr_len = sizeof(struct sockaddr);
+
+	/*
+	 * Set up queues
+	 */
+
+	std::queue<L2Packet*> queues[3];
+
+	/*
+	 * Listen for incoming packets
+	 */
+
+	printf("Emulator polling on port %ld\n", port);
+	fflush(stdout);
+
+	L2Packet* recv_packet = new L2Packet();
+
+	while(1)
+	{
+		bytes_read = recvfrom(sock, *recv_packet, L1_HEADER + L2_HEADER + DEFAULT_PAYLOAD, flags,
+				(struct sockaddr *) &emulator_addr, &addr_len);
+
+		if (bytes_read != 0)
+		{
+			bool packet_found = false;
+
+			// TODO: randomly destroy packet
+
+			// check forwarding table
+			for (unsigned int i = 0; i < forward_table.size(); i++)
+			{
+				if (recv_packet->dest_ip_addr() == forward_table[i].dest_ip)
+				{
+					packet_found = true;
+
+					unsigned char priority = recv_packet->priority();
+
+					if (priority > 2 || priority == 0)
+					{
+						// Print error to logstream
+						// drop packet
+						delete recv_packet;
+						recv_packet = new L2Packet();
+					}
+					else
+					{
+						if (queues[priority-1].size() < queue_size)
+						{
+							// add packet
+							queues[priority-1].push(recv_packet);
+							recv_packet = new L2Packet();
+						}
+						else
+						{
+							// drop packet
+							delete recv_packet;
+							recv_packet = new L2Packet();
+						}
+					}
+
+					break;
+				}
+			}
+
+			// Outgoing table entry was not found
+			if (!packet_found)
+			{
+				// drop packet
+				delete recv_packet;
+				recv_packet = new L2Packet();
+			}
+		}
+		else
+		{
+			// TODO: implement delay
+
+			bool packet_was_sent = false;
+			for (int i = 0; i < queues.size(); i++)
+			{
+				if (!queues[i].empty())
+				{
+					packet_was_sent = true;
+					break;
+				}
+			}
+
+			if (!packet_was_sent)
+			{
+
+			}
+			// if no delay break
+			// queue stuff
+		}
 	}
 }

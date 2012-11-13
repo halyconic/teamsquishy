@@ -7,6 +7,7 @@ all: requester sender
 	@echo 'Making all'
 	$(MAKE) -C requester/Default all
 	$(MAKE) -C sender/Default all
+	$(MAKE) -C emulator/Default all
 
 requester:
 	$(MAKE) -C requester/Default all
@@ -55,6 +56,11 @@ p2_t1: all
 	@echo 'Run emulator'
 	cd test/emulator && ../../emulator/Default/emulator -p 0 -q 0 -f table.txt -l 0 -d debug >> emulator.txt &
 	@echo 'Done'
+	
+p2_t1_a:
+	@echo 'Open relevant logs'
+	gedit test/emulator/table.txt &
+	gedit test/emulator/emulator.txt &
 	
 analyze:
 	@echo 'Open relevant logs'
