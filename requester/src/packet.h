@@ -209,11 +209,26 @@ struct L2Packet
 	// TODO: This does not work if payload is full!!!
 	void print()
 	{
-		printf("%c %d %d\n%s\n",
+		/*printf("%c %d %d\n%s\n",
 			   type(),
 			   seq(),
 			   length(),
-			   payload());
+			   payload());*/
+
+		printf("priority: %d, "
+							"src IP: %d,"
+							"src port: %d."
+							"dest IP: %d."
+							"dest port: %d."
+							"length: %d,"
+							"pckt type: %d,"
+							"seq: %d,"
+							"length: %d,"
+							"payload: %d",
+							src_ip_addr(), src_port(),
+							dest_ip_addr(), dest_port(),
+							length(), type(), seq(),
+							length(), payload());
 	}
 
 	// Assumes length < payload

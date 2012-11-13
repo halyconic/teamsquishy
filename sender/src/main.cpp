@@ -229,18 +229,22 @@ int main(int argc, char **argv)
 
 	if (1)
 	{
-		L1Packet send_packet, recv_packet;
+		L2Packet send_packet, recv_packet;
 
-		bytes_read = recvfrom(sock, recv_packet, L1_HEADER + DEFAULT_PAYLOAD, 0,
+		bytes_read = recvfrom(sock, recv_packet, L2_HEADER + DEFAULT_PAYLOAD, 0,
 			(struct sockaddr *) &requester_addr, &addr_len);
 
 		if (debug)
 		{
 			printf("Packet being received:\n");
-			printf("%c %d %d\n",
+			/*printf("%c %d %d\n",
 					recv_packet.type(),
 					recv_packet.seq(),
 					recv_packet.length());
+			*/
+			recv_packet.print();
+
+
 			printf("Bytes read: %d\n", bytes_read);
 			printf("Payload: %s\n", recv_packet.payload());
 		    printf("Origin: %s %u\n\n",
@@ -250,6 +254,8 @@ int main(int argc, char **argv)
 
 		// Set destination port of requester
 		requester_addr.sin_port = htons(requester_port);
+
+
 
 		if (recv_packet.type() == 'R')
 		{
@@ -282,19 +288,29 @@ int main(int argc, char **argv)
 
 				send_packet.clear(length + L1_HEADER);
 
+				// TODO: establish values for sender's L2 packet
 				send_packet.type() = 'D';
 				send_packet.seq() = seq_no;
+				send_packet.src_ip_addr() = sender_addr.sin_addr.s_addr;
+				send_packet.src_port() = sender_addr.sin_port;
+				send_packet.dest_ip_addr() = requester_addr.sin_addr;
+				send_packet.dest_port() = requester_addr.sin_port;
+
+
+
 				filestr.read(send_packet.payload(), length);
 				send_packet.length() = (unsigned int) filestr.gcount();
+				send_packet.l1_length() = send_packet.length() + L1_HEADER;
 				if (send_packet.length() !=0)
 				{
 					if (debug)
 					{
 						printf("Packet being sent:\n");
-						printf("%c %d %d\n",
+						/*printf("%c %d %d\n",
 								send_packet.type(),
 								send_packet.seq(),
-								send_packet.length());
+								send_packet.length());*/
+						send_packet.print();
 						printf("Payload: %s\n", send_packet.payload());
 						printf("Destination: %s %u\n\n",
 							   inet_ntoa(requester_addr.sin_addr),
@@ -305,27 +321,48 @@ int main(int argc, char **argv)
 					sendto(sock, send_packet, packet_size, 0,
 							(struct sockaddr *) &requester_addr, sizeof(struct sockaddr));
 
-					seq_no += length;
+					seq_no += 1;
 					counter.wait();
 				}
+
+
 			}
+
+			printf("end seq number: %d\n", seq_no);
 
 			filestr.close();
 
-			char buf_end_packet[L1_HEADER] = {0};
-			buf_end_packet[0] = 'E';
-			buf_end_packet[1] = seq_no;
+			L1Packet end_packet = L1Packet(0);
+
+//			char buf_end_packet[L1_HEADER] = {0};
+//
+//			for (int i = 0; i < sizeof(buf_end_packet); i++)
+//			{
+//				printf("buff_end_packet: %d\n",buf_end_packet[0]);
+//			}
+
+//			buf_end_packet[0] = 'E';
+//			buf_end_packet[1] = seq_no;
+
+			end_packet.type() = 'E';
+			end_packet.seq() = seq_no;
+
+//			if (debug)
+//			{
+//				printf("End packet being sent:\n");
+//				printf("%c %d %d\n",
+//						buf_end_packet[0],
+//						(int)buf_end_packet[1],
+//						(int)buf_end_packet[5]);
+//			}
 
 			if (debug)
 			{
 				printf("End packet being sent:\n");
-				printf("%c %d %d\n",
-						buf_end_packet[0],
-						(int)buf_end_packet[1],
-						(int)buf_end_packet[5]);
+				end_packet.print();
 			}
 
-			sendto(sock, buf_end_packet, sizeof(buf_end_packet), 0,
+			sendto(sock, end_packet, L1_HEADER, 0,
 					(struct sockaddr *)&requester_addr, sizeof(struct sockaddr));
 		}
 		else

@@ -1,15 +1,25 @@
 The port is 5050
 Entry acknowledged:
-hello.txt 3 mumble-34 5051
-IP lookup: mumble-34.cs.wisc.edu
+split.txt 1 mumble-33 5052
+IP lookup: mumble-33.cs.wisc.edu
 Packet being sent:
 R 0 0
 
-Destination: 128.105.112.34 5051
-Raw payload: hello.txt
+Destination: 128.105.112.33 5052
+Raw payload: split.txt
+Packet sent
+Entry acknowledged:
+split.txt 2 mumble-33 5053
+IP lookup: mumble-33.cs.wisc.edu
+Packet being sent:
+R 0 0
+
+Destination: 128.105.112.33 5053
+Raw payload: split.txt‡
 Packet sent
 Requester waiting for sender on port 5050
 Packet received:
+<<<<<<< HEAD
 D 0 8
 *This is
 2012-11-11 17:22:29
@@ -22,25 +32,131 @@ D 8 8
 2012-11-11 17:22:30
 Destination: 128.105.112.34 5051
 added packet to list with sequence number: 8
+=======
+D 0 4
+*Thi
+2012-11-11 19:12:27
+Destination: 128.105.112.33 5052
+added packet to list with sequence number: 0
 
 Packet received:
-D 16 4
-xt.
+D 1000 3
+Thi
+2012-11-11 19:12:27
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1000
 
+Packet received:
+D 1 4
+s is
+2012-11-11 19:12:28
+Destination: 128.105.112.33 5052
+added packet to list with sequence number: 1
+
+Packet received:
+D 1001 3
+s i
+2012-11-11 19:12:28
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1001
+
+Packet received:
+D 2 4
+ spl
+2012-11-11 19:12:29
+Destination: 128.105.112.33 5052
+added packet to list with sequence number: 2
+
+Packet received:
+D 1002 3
+s s
+2012-11-11 19:12:29
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1002
+
+Packet received:
+D 3 4
+it1.
+2012-11-11 19:12:30
+Destination: 128.105.112.33 5052
+added packet to list with sequence number: 3
+
+Packet received:
+D 1003 3
+pli
+2012-11-11 19:12:30
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1003
+
+Packet received:
+D 4 4
+txt.
+2012-11-11 19:12:31
+Destination: 128.105.112.33 5052
+added packet to list with sequence number: 4
+
+Packet received:
+D 1004 3
+t2.
+2012-11-11 19:12:31
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1004
+
+Packet received:
+D 5 3
+
+*
+
+2012-11-11 19:12:32
+Destination: 128.105.112.33 5052
+added packet to list with sequence number: 5
+
+Packet received:
+D 1005 3
+txt
+2012-11-11 19:12:32
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1005
+>>>>>>> 600df6badb517f6ef7863c09a68eb793d0e62cd6
+
+Packet received:
+E 6 0
+
+<<<<<<< HEAD
 2012-11-11 17:22:31
 Destination: 128.105.112.34 5051
 added packet to list with sequence number: 16
+=======
+2012-11-11 19:12:33
+Destination: 128.105.112.33 5052
+added packet to list with sequence number: 6
+>>>>>>> 600df6badb517f6ef7863c09a68eb793d0e62cd6
 
 Packet received:
-E 24 0
+D 1006 2
+.
 
+<<<<<<< HEAD
 2012-11-11 17:22:32
 Destination: 128.105.112.34 5051
 added packet to list with sequence number: 24
+=======
+2012-11-11 19:12:33
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1006
+
+Packet received:
+E 1007 0
+
+2012-11-11 19:12:34
+Destination: 128.105.112.33 5053
+added packet to list with sequence number: 1007
+>>>>>>> 600df6badb517f6ef7863c09a68eb793d0e62cd6
 
 
 DEBUG
 
+<<<<<<< HEAD
 D 0 8
 *This is
 seconds: 1352676149
@@ -48,21 +164,89 @@ seconds: 1352676149
 D 8 8
  hello.t
 seconds: 1352676150
+=======
+D 0 4
+*Thi
+seconds: 1352682747
 
-D 16 4
-xt.
+D 1 4
+s is
+seconds: 1352682748
 
+D 2 4
+ spl
+seconds: 1352682749
+
+D 3 4
+it1.
+seconds: 1352682750
+
+D 4 4
+txt.
+seconds: 1352682751
+
+D 5 3
+
+*
+
+seconds: 1352682752
+
+E 6 0
+
+seconds: 1352682753
+
+D 1000 3
+Thi
+seconds: 1352682747
+
+D 1001 3
+s i
+seconds: 1352682748
+
+D 1002 3
+s s
+seconds: 1352682749
+
+D 1003 3
+pli
+seconds: 1352682750
+
+D 1004 3
+t2.
+seconds: 1352682751
+
+D 1005 3
+txt
+seconds: 1352682752
+>>>>>>> 600df6badb517f6ef7863c09a68eb793d0e62cd6
+
+D 1006 2
+.
+
+<<<<<<< HEAD
 seconds: 1352676151
+=======
+seconds: 1352682753
+>>>>>>> 600df6badb517f6ef7863c09a68eb793d0e62cd6
 
-E 24 0
+E 1007 0
 
+<<<<<<< HEAD
 seconds: 1352676152
+=======
+seconds: 1352682754
+>>>>>>> 600df6badb517f6ef7863c09a68eb793d0e62cd6
 
 
 BEGIN SUMMARY
 
-Total data packets received: 4
-total data bytes received: 20
-average seconds for sender 1: 0.750000
-duration of entire test: 3 seconds
-2012-11-11 17:22:32
+Total data packets received: 15
+total data bytes received: 43
+average milliseconds for sender 1: 857.156571
+average microseconds for sender 1: 857156.571429
+average milliseconds for sender 2: 875.069875
+average microseconds for sender 2: 875069.875000
+duration of entire test: 7000.559000 milliseconds
+duration of entire test: 7000559.000000 microseconds
+hi
+2012-11-11 19:12:34
