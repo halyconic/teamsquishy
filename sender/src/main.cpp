@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 		while (filestr.good())
 		{
 			// Cache batch of packets to send
-			for (unsigned int i = 0; i < window_size; i++)
+			for (unsigned int i = 0; i < window_size && filestr.good(); i++)
 			{
 				if (debug)
 					printf("Beginning to read from file.\n");
@@ -353,39 +353,70 @@ int main(int argc, char **argv)
 				// send batch
 				for (unsigned int i = 0; i < timeout_tracker.size(); i++)
 				{
-					unsigned int key = timeout_tracker[i].second;
-					L2Packet send_packet = send_packets[key];
-
-					// Send packets
-					if (debug)
+					// Resend if timeout expired
+					if (timeout_tracker[i].first.check())
 					{
-						printf("Packet being sent:\n");
-						send_packet.print();
-						printf("Payload: %s\n", send_packet.payload());
-						printf("Destination: %s %u\n\n",
-							   inet_ntoa(requester_addr.sin_addr),
-							   ntohs(requester_addr.sin_port));
+						unsigned int key = timeout_tracker[i].second;
+						L2Packet send_packet = send_packets[key];
+
+						// Send packets
+						if (debug)
+						{
+							printf("Packet being sent:\n");
+							send_packet.print();
+							printf("Payload: %s\n", send_packet.payload());
+							printf("Destination: %s %u\n\n",
+								   inet_ntoa(requester_addr.sin_addr),
+								   ntohs(requester_addr.sin_port));
+						}
+
+						sendto(sock, send_packet, send_packet.l2_length(), 0,
+								(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
+
+						seq_no += 1;
+						counter.wait();
 					}
-
-					sendto(sock, send_packet, send_packet.l2_length(), 0,
-							(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
-
-					seq_no += 1;
-					counter.wait();
 				}
 
 				// ack receive
 				bytes_read = recvfrom(sock, recv_packet, recv_packet.l2_length(), MSG_DONTWAIT,
 					(struct sockaddr *) &requester_addr, &addr_len);
 
+				if (bytes_read > 0)
+				{
+					if (debug)
+					{
+						printf("Packet being received:\n");
+						recv_packet.print();
+						printf("Bytes read: %d\n", bytes_read);
+						printf("Origin: %s %u\n\n",
+							   inet_ntoa(requester_addr.sin_addr),
+							   ntohs(requester_addr.sin_port));
+					}
+
+					// Remove matching entry from tracker, ignore irrelevant ack packets
+					for (unsigned int i = 0; i < timeout_tracker.size(); i++)
+					{
+						unsigned int key = timeout_tracker[i].second;
+						L2Packet send_packet = send_packets[key];
+
+						if (send_packet.seq() == recv_packet.seq())
+						{
+							// Remove element from array
+							timeout_tracker.erase(timeout_tracker.begin() + i);
+						}
+
+						// Break to be safe - breaking the iterator
+						break;
+					}
+
+					// Extra ACK packets are ignored
+				}
 			}
 		}
-
-		printf("end seq number: %d\n", seq_no);
-
 		filestr.close();
 
-		send_packet.clear(L1_HEADER + L2_HEADER);
+		L2Packet send_packet(0);
 		send_packet.type() = 'E';
 		send_packet.seq() = seq_no;
 		send_packet.priority() = priority;
