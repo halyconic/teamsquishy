@@ -3,6 +3,8 @@
  *
  *  Created on: Oct 6, 2012
  *      Author: KevStev
+ *
+ *      TODO: src addr
  */
 
 #include <unistd.h> //getopt
@@ -408,6 +410,13 @@ int main(int argc, char **argv)
 		fflush(stdout);
 	}
 
+	// Initialize immutable components of ack packet
+	L2Packet ack_packet = L2Packet(0);
+	ack_packet.type() = 'A';
+	ack_packet.length() = 0;
+	ack_packet.priority() = 1;
+	ack_packet.l1_length() = L1_HEADER;
+
 	std::vector<Super_Packet> packets_list;
 	timeval begin_time;
 	gettimeofday(&begin_time, NULL);
@@ -442,6 +451,26 @@ int main(int argc, char **argv)
 
 			// add packet to vector
 			packets_list.push_back(Super_Packet(recv_packet, curr_time));
+
+			/*
+			 * Send acknowledgement
+			 */
+
+			ack_packet.seq() = recv_packet->seq();
+			ack_packet.dest_ip_addr() = recv_packet->src_ip_addr();
+			ack_packet.dest_port() = recv_packet->src_port();
+			ack_packet.src_ip_addr() = requester_addr.sin_addr.s_addr;
+			ack_packet.src_port() = requester_addr.sin_port;
+
+			if (debug)
+			{
+				printf("Ack sent to destination: %s %u\n\n",
+					   inet_ntoa(sender_addr.sin_addr),
+					   ntohs(sender_addr.sin_port));
+			}
+
+			sendto(send_sock, ack_packet, ack_packet.l2_length(), 0,
+					(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
 		}
 		else if (recv_packet->type() == 'E')
 		{

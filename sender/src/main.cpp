@@ -382,7 +382,8 @@ int main(int argc, char **argv)
 				bytes_read = recvfrom(sock, recv_packet, recv_packet.l2_length(), MSG_DONTWAIT,
 					(struct sockaddr *) &requester_addr, &addr_len);
 
-				if (bytes_read > 0)
+				// If ack packet was received
+				if (bytes_read > 0 && recv_packet.type() == 'A')
 				{
 					if (debug)
 					{
