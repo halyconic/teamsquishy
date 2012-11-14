@@ -341,7 +341,7 @@ int main(int argc, char **argv)
 					}
 
 					sendto(sock, send_packet, send_packet.l2_length(), 0,
-							(struct sockaddr *) &requester_addr, sizeof(struct sockaddr));
+							(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
 
 					seq_no += 1;
 					counter.wait();
