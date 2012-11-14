@@ -265,51 +265,61 @@ int main(int argc, char **argv)
 	printf("Sender waiting for requester on port %ld\n", sender_port);
 	fflush(stdout);
 
-	if (1)
+	L2Packet recv_packet;
+
+	bytes_read = recvfrom(sock, recv_packet, recv_packet.l2_length(), 0,
+		(struct sockaddr *) &requester_addr, &addr_len);
+
+	if (debug)
 	{
-		L2Packet send_packet, recv_packet;
+		printf("Packet being received:\n");
+		recv_packet.print();
+		printf("Bytes read: %d\n", bytes_read);
+		printf("Origin: %s %u\n\n",
+			   inet_ntoa(requester_addr.sin_addr),
+			   ntohs(requester_addr.sin_port));
+	}
 
-		bytes_read = recvfrom(sock, recv_packet, recv_packet.l2_length(), 0,
-			(struct sockaddr *) &requester_addr, &addr_len);
+	// Set destination port of requester
+	requester_addr.sin_port = htons(requester_port);
 
-		if (debug)
+	if (recv_packet.type() == 'R')
+	{
+		// Create window
+		if (recv_packet.length() <= 0)
 		{
-			printf("Packet being received:\n");
-			recv_packet.print();
-			printf("Bytes read: %d\n", bytes_read);
-		    printf("Origin: %s %u\n\n",
-				   inet_ntoa(requester_addr.sin_addr),
-				   ntohs(requester_addr.sin_port));
+			printf("The receiver has requested a packet window less than size 1.\n");
+			printf("Request has been ignored.\n");
+			exit(0);
+		}
+		unsigned int window_size = recv_packet.length();
+
+		// Break requested file into packets
+		if (debug)
+			printf("Filename: %s\n", recv_packet.payload());
+
+		std::ifstream::pos_type file_size;
+		std::ifstream filestr;
+
+		filestr.open (recv_packet.payload(), std::ios::in|std::ios::binary|std::ios::ate);
+
+		if (filestr.is_open() == false)
+		{
+			printf("Unable to open file %s\n", recv_packet.payload());
+			exit(-1);
 		}
 
-		// Set destination port of requester
-		requester_addr.sin_port = htons(requester_port);
+		char send_buffer[length];
+		file_size = filestr.tellg();
+		filestr.seekg(0, std::ios::beg);
 
-		if (recv_packet.type() == 'R')
+		Counter counter = Counter(rate);
+
+		L2Packet* send_packets = new L2Packet[window_size];
+
+		while (filestr.good())
 		{
-			// Break requested file into packets
-			if (debug)
-				printf("Filename: %s\n", recv_packet.payload());
-
-			std::ifstream::pos_type file_size;
-			std::ifstream filestr;
-
-			filestr.open (recv_packet.payload(), std::ios::in|std::ios::binary|std::ios::ate);
-
-			if (filestr.is_open() == false)
-			{
-				printf("Unable to open file %s\n", recv_packet.payload());
-				exit(-1);
-			}
-
-			char send_buffer[length];
-			file_size = filestr.tellg();
-			filestr.seekg(0, std::ios::beg);
-
-			Counter counter = Counter(rate);
-			//counter.wait();
-
-			while (filestr.good())
+			for (int i = 0; i < window_size; i++)
 			{
 				if (debug)
 					printf("Beginning to read from file.\n");
@@ -346,35 +356,33 @@ int main(int argc, char **argv)
 					seq_no += 1;
 					counter.wait();
 				}
-
-
 			}
-
-			printf("end seq number: %d\n", seq_no);
-
-			filestr.close();
-
-			send_packet.clear(L1_HEADER + L2_HEADER);
-			send_packet.type() = 'E';
-			send_packet.seq() = seq_no;
-			send_packet.priority() = priority;
-			send_packet.src_ip_addr() = sender_addr.sin_addr.s_addr;
-			send_packet.src_port() = sender_addr.sin_port;
-			send_packet.dest_ip_addr() = requester_addr.sin_addr.s_addr;
-			send_packet.dest_port() = requester_addr.sin_port;
-
-			if (debug)
-			{
-				printf("End packet being sent:\n");
-				send_packet.print();
-			}
-
-			sendto(sock, send_packet, L1_HEADER + L2_HEADER, 0,
-					(struct sockaddr *)&emu_addr, sizeof(struct sockaddr));
 		}
-		else
+
+		printf("end seq number: %d\n", seq_no);
+
+		filestr.close();
+
+		send_packet.clear(L1_HEADER + L2_HEADER);
+		send_packet.type() = 'E';
+		send_packet.seq() = seq_no;
+		send_packet.priority() = priority;
+		send_packet.src_ip_addr() = sender_addr.sin_addr.s_addr;
+		send_packet.src_port() = sender_addr.sin_port;
+		send_packet.dest_ip_addr() = requester_addr.sin_addr.s_addr;
+		send_packet.dest_port() = requester_addr.sin_port;
+
+		if (debug)
 		{
-			// Drop packet
+			printf("End packet being sent:\n");
+			send_packet.print();
 		}
+
+		sendto(sock, send_packet, L1_HEADER + L2_HEADER, 0,
+				(struct sockaddr *)&emu_addr, sizeof(struct sockaddr));
+	}
+	else
+	{
+		// Drop packet
 	}
 }

@@ -29,9 +29,26 @@ void Counter::wait()
 
 	gettimeofday(&curr_time, NULL);
 	time_elapsed.tv_usec = curr_time.tv_usec - last_time.tv_usec;
+
+	// wait (time_to_wait - time_elapsed_millisec)
 	if (wait_time.tv_usec > time_elapsed.tv_usec)
 		usleep(wait_time.tv_usec - time_elapsed.tv_usec);
 
-	// wait (time_to_wait - time_elapsed_millisec)
 	gettimeofday(&last_time, NULL);
+}
+
+bool Counter::check()
+{
+	struct timeval curr_time;
+	struct timeval time_elapsed;
+
+	gettimeofday(&curr_time, NULL);
+	time_elapsed.tv_usec = curr_time.tv_usec - last_time.tv_usec;
+
+	// wait (time_to_wait - time_elapsed_millisec)
+	if (wait_time.tv_usec > time_elapsed.tv_usec)
+		return false;
+
+	gettimeofday(&last_time, NULL);
+	return true;
 }
