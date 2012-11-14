@@ -374,12 +374,12 @@ int main(int argc, char **argv)
 				printf("Packet being sent:\n");
 				send_packet.print();
 			    printf("Destination: %s %u\n",
-					   inet_ntoa(sender_addr.sin_addr),
-					   ntohs(sender_addr.sin_port));
+					   inet_ntoa(emu_addr.sin_addr),
+					   ntohs(emu_addr.sin_port));
 			}
 
 			sendto(send_sock, send_packet, send_packet.l2_length(), 0,
-					(struct sockaddr *) &sender_addr, sizeof(struct sockaddr));
+					(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
 
 			if (debug)
 				printf("Packet sent\n");
@@ -419,7 +419,10 @@ int main(int argc, char **argv)
 		gettimeofday(&curr_time, NULL);
 
 		if (debug)
+		{
 			printf("Packet received:\n");
+			recv_packet->print();
+		}
 
 		if (recv_packet->type() == 'D')
 		{
