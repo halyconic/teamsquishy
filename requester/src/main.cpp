@@ -32,6 +32,27 @@
 
 const char* domain = ".cs.wisc.edu";
 
+struct Super_Packet
+{
+	L2Packet *packet;
+	timeval time;
+
+	//time stamp
+	Super_Packet(L2Packet *p, timeval t)
+	{
+		packet = p;
+		time = t;
+	}
+
+	void print()
+	{
+		packet->print();
+
+		// time
+		printf("seconds: %d\n", time.tv_sec);
+	}
+};
+
 bool compare (Super_Packet p1, Super_Packet p2)
 {
 	if (p1.packet->seq() < p2.packet->seq())
@@ -185,7 +206,8 @@ int main(int argc, char **argv)
 	 * TODO: test new params
 	 */
 
-	if (!debug && (port < 1024 || port > 65536))
+	if (port < 1024 || port > 65536
+			|| emu_port < 1024 || emu_port > 65536)
 	{
 		printf("Please supply a port number between 1025 and 65535.\n");
 		return 0;
@@ -215,9 +237,9 @@ int main(int argc, char **argv)
 
 	// Set up socket connection
 	int send_sock, recv_sock;
-	struct sockaddr_in requester_addr, sender_addr;
-	struct hostent* send_ent;
-	char recv_data[MAX_DATA];
+	struct sockaddr_in requester_addr, sender_addr, emu_addr;
+	struct hostent *emu_ent, *dest_ent;
+	//char recv_data[MAX_DATA];
 	int bytes_read;
 	socklen_t addr_len;
 
@@ -227,15 +249,40 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	/*
+	 * Set up send
+	 */
+
 	// Where we are sending to
 	sender_addr.sin_family = AF_INET;
 	addr_len = sizeof(struct sockaddr);
+
+	// Intermediate emulator
+	char* ip_lookup = new char[strlen(emu_hostname) + strlen(domain)];
+	ip_lookup = strcat(emu_hostname, domain);
+	emu_ent = (struct hostent *) gethostbyname(ip_lookup);
+
+	if (0 && debug)
+		printf("IP lookup: %s\n", ip_lookup);
+
+	// Verify emulator exists
+	if ((struct hostent *) emu_ent == NULL)
+	{
+		// TODO: Gracefully handle missing sender
+		printf("Host was not found by the name of %s\n", emu_hostname);
+		exit(1);
+	}
+
+	emu_addr.sin_family = AF_INET;
+	emu_addr.sin_port = htons(emu_port);
+	emu_addr.sin_addr = *((struct in_addr *)emu_ent->h_addr);
+	bzero(&(emu_addr.sin_zero), 8);
 
 	/*
 	 * Set up receive
 	 */
 
-	if (debug)
+	if (0 && debug)
 	{
 		printf("The port is %lu\n", port);
 		fflush(stdout);
@@ -243,7 +290,7 @@ int main(int argc, char **argv)
 
 	// Own address
 	requester_addr.sin_family = AF_INET;
-	requester_addr.sin_port = htons(port);// requester_addr.sin_port = htons(0);
+	requester_addr.sin_port = htons(port);
 	requester_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	bzero(&(requester_addr.sin_zero), 8);
 
@@ -251,14 +298,6 @@ int main(int argc, char **argv)
 	{
 		perror("Socket");
 		exit(1);
-	}
-
-	// If talking to 'echo'
-	if (debug && strcmp(arg_debug, "echo") == 0)
-	{
-		printf("Echo mode: Listening for packet\n");
-		bytes_read = recvfrom(send_sock, recv_data, sizeof(recv_data), 0,
-			(struct sockaddr *) &sender_addr, &addr_len);
 	}
 
 	// Bind port to listen on
@@ -280,7 +319,7 @@ int main(int argc, char **argv)
 		{
 			num_active_senders++;
 
-			if (debug)
+			if (0 && debug)
 			{
 				printf("Entry acknowledged:\n");
 				printf("%s %d %s %d\n",
@@ -290,36 +329,46 @@ int main(int argc, char **argv)
 					tracker[i].port);
 			}
 
-			// Send request
+			/*
+			 * Send request
+			 */
 
-			// Adjust where we are sending to
-			char* ip_lookup = new char[strlen(tracker[i].machinename) + strlen(domain)];
-			ip_lookup = strcat(tracker[i].machinename, domain);
-			send_ent = (struct hostent *) gethostbyname(ip_lookup);
+			// Adjust our destination
+			char* ip_lookup_dest = new char[strlen(tracker[i].machinename) + strlen(domain)];
+			ip_lookup_dest = strcat(tracker[i].machinename, domain);
+			dest_ent = (struct hostent *) gethostbyname(ip_lookup_dest);
 
-			if (debug)
+			if (0 && debug)
 			{
 				printf("IP lookup: %s\n", ip_lookup);
 			}
 
 			// Verify sender exists
-			if ((struct hostent *) send_ent == NULL)
+			if ((struct hostent *) dest_ent == NULL)
 			{
 				// TODO: Gracefully handle missing sender
-				printf("Host was not found by the name of %s\n", arg_debug);
+				printf("Host was not found by the name of %s\n", ip_lookup_dest);
 				exit(1);
 			}
 
-			// Set up remote address
+			// Set up destination address (depreciated)
 			sender_addr.sin_port = htons(tracker[i].port);
-			sender_addr.sin_addr = *((struct in_addr *)send_ent->h_addr);
+			sender_addr.sin_addr = *((struct in_addr *)dest_ent->h_addr);
 			bzero(&(sender_addr.sin_zero), 8);
 
 			// Form packet
-			L1Packet send_packet;
+			L2Packet send_packet = L2Packet(strlen(file_option));
 			send_packet.type() = 'R';
 			send_packet.seq() = 0;
 			send_packet.length() = 0;
+			send_packet.priority() = 1;
+			send_packet.src_ip_addr() = requester_addr.sin_addr.s_addr;
+			send_packet.src_port() = requester_addr.sin_port;
+			send_packet.dest_ip_addr() = sender_addr.sin_addr.s_addr;
+			send_packet.dest_port() = sender_addr.sin_port;
+			send_packet.l1_length() = L1_HEADER;
+			strcpy(send_packet.payload(), file_option);
+
 			if (debug)
 			{
 				printf("Packet being sent:\n");
@@ -329,30 +378,7 @@ int main(int argc, char **argv)
 					   ntohs(sender_addr.sin_port));
 			}
 
-			char* buf_send_packet = new char[strlen(file_option) + MAX_HEADER];
-
-			if (strlen(file_option) < MAX_PAYLOAD)
-			{
-				buf_send_packet[strlen(file_option)] = '\0';
-			}
-
-			// Set the optimal size of the packet to send
-			unsigned int packet_size =
-					  sizeof(char)
-					+ sizeof(unsigned int)
-					+ sizeof(unsigned int)
-					+ strlen(file_option);
-
-			// Copy to byte form (inefficient)
-			memcpy(&buf_send_packet[0], &send_packet.type(), sizeof(char));
-			memcpy(&buf_send_packet[1], &send_packet.seq(), sizeof(unsigned int));
-			memcpy(&buf_send_packet[5], &send_packet.length(), sizeof(unsigned int));
-			memcpy(&buf_send_packet[9], file_option, strlen(file_option));
-
-			if (debug)
-				printf("Raw payload: %s\n", &buf_send_packet[9]);
-
-			sendto(send_sock, buf_send_packet, packet_size, 0,
+			sendto(send_sock, send_packet, send_packet.l2_length(), 0,
 					(struct sockaddr *) &sender_addr, sizeof(struct sockaddr));
 
 			if (debug)
@@ -383,19 +409,17 @@ int main(int argc, char **argv)
 	gettimeofday(&begin_time, NULL);
 	while (num_active_senders > 0)
 	{
-		Packet* recv_packet = new Packet();
+		L2Packet* recv_packet = new L2Packet();
 
-		bytes_read = recvfrom(recv_sock, *recv_packet, sizeof(recv_data), 0,
-			(struct sockaddr *) &sender_addr, &addr_len);
+		bytes_read = recvfrom(recv_sock, *recv_packet, recv_packet->l2_length(), 0,
+			(struct sockaddr *) &emu_addr, &addr_len);
 
 		// get time stamp of current packet
 		struct timeval curr_time;
-//		struct timeval time_elapsed;
-
 		gettimeofday(&curr_time, NULL);
 
-
-		printf("Packet received:\n");
+		if (debug)
+			printf("Packet received:\n");
 
 		if (recv_packet->type() == 'D')
 		{
@@ -450,7 +474,7 @@ int main(int argc, char **argv)
 	{
 		printf("\nDEBUG\n\n");
 
-		for (int i = 0; i < packets_list.size(); i++)
+		for (unsigned int i = 0; i < packets_list.size(); i++)
 		{
 			packets_list.at(i).print();
 			printf("\n");
@@ -465,7 +489,7 @@ int main(int argc, char **argv)
 
 	//total data bytes received
 	int sum_of_bytes;
-	for (int i = 0; i < packets_list.size(); i++)
+	for (unsigned int i = 0; i < packets_list.size(); i++)
 	{
 		sum_of_bytes += packets_list.at(i).packet->length();
 	}
@@ -512,10 +536,6 @@ int main(int argc, char **argv)
 	printf("duration of entire test: %f milliseconds\n", diff_time_ms);
 	printf("duration of entire test: %f microseconds\n", diff_time_us);
 
-
-
-printf("hi\n");
-
 	time_t now;
 	struct tm *tm;
 
@@ -529,13 +549,6 @@ printf("hi\n");
 			tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 			tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-	//const clock_t begin_time = clock();
-	// do something
-	//std::cout << float( clock () - begin_time ) /  CLOCKS_PER_SEC;*/
-
-
-
-
 	// Print out to file
 	std::ofstream myfile;
 	myfile.open (file_option);
@@ -543,12 +556,6 @@ printf("hi\n");
 	{
 		myfile << packets_list.at(i).packet->payload();
 	}
-	//myfile << "Writing this to a file.\n";
 	myfile.close();
-
-
-
-
-	// Initialize the server to be ready to send
 }
 

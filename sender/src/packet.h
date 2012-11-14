@@ -1,13 +1,18 @@
 #include <fstream>
 #include <stdio.h>
 
-const int DEFAULT_PAYLOAD = 5*1024;
-const int L1_HEADER = 1 + 4 + 4;
-const int L2_HEADER = 1 + 4 + 2 + 4 + 2 + 4;
+const unsigned int DEFAULT_PAYLOAD = 5*1024;
+const unsigned int L1_HEADER = 1 + 4 + 4;
+const unsigned int L2_HEADER = 1 + 4 + 2 + 4 + 2 + 4;
 
 struct L1Packet
 {
-	int payload_buffer_size;
+	unsigned int payload_buffer_size;
+
+	unsigned int l1_length()
+	{
+		return payload_buffer_size + L1_HEADER;
+	}
 
 	/*
 	 * L1 fields
@@ -45,6 +50,12 @@ struct L1Packet
 	}
 
 	// Assumes length < payload
+	void clear()
+	{
+		bzero(values_, l1_length());
+	}
+
+	// Assumes length < payload
 	void clear(unsigned int length)
 	{
 		bzero(values_, length);
@@ -68,7 +79,12 @@ private:
 
 struct L2Packet
 {
-	int payload_buffer_size;
+	unsigned int payload_buffer_size;
+
+	unsigned int l2_length()
+	{
+		return payload_buffer_size + L1_HEADER + L2_HEADER;
+	}
 
 	/*
 	 * L2 fields
@@ -127,11 +143,15 @@ struct L2Packet
 	// TODO: This does not work if payload is full!!!
 	void print()
 	{
-		printf("%c %d %d\n%s\n",
-			   type(),
-			   seq(),
-			   length(),
-			   payload());
+		printf("L2: %x %o %d %o %d %d\nL1: %c %d %d\n%s\n",
+				priority(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), l1_length(),
+				type(), seq(), length(),
+				payload());
+	}
+
+	void clear()
+	{
+		bzero(values_, l2_length());
 	}
 
 	// Assumes length < payload

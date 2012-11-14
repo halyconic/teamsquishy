@@ -18,6 +18,21 @@
 #include "forward.h"
 #include "packet.h"
 
+class Hop
+{
+public:
+	L2Packet *packet;
+	unsigned int next_ip_addr;
+	unsigned short int next_port;
+
+	Hop() {;}
+
+	Hop(L2Packet* p, unsigned int i = 0, unsigned short int n = 0) :
+		packet(p),
+		next_ip_addr(i),
+		next_port(n) {;}
+};
+
 int main(int argc, char **argv)
 {
 	/*
@@ -169,7 +184,7 @@ int main(int argc, char **argv)
 	socklen_t addr_len; // <- and this too, with a different type.
 	int flags = MSG_DONTWAIT;
 
-	struct sockaddr_in emulator_addr;
+	struct sockaddr_in emulator_addr, next_addr;
 
 	// Own address
 	emulator_addr.sin_family = AF_INET;
@@ -189,7 +204,8 @@ int main(int argc, char **argv)
 	 * Set up queues
 	 */
 
-	std::queue<L2Packet*> queues[3];
+	const int NUM_QUEUES = 3;
+	std::queue<Hop> queues[NUM_QUEUES];
 
 	/*
 	 * Listen for incoming packets
@@ -208,8 +224,6 @@ int main(int argc, char **argv)
 		if (bytes_read != 0)
 		{
 			bool packet_found = false;
-
-			// TODO: randomly destroy packet
 
 			// check forwarding table
 			for (unsigned int i = 0; i < forward_table.size(); i++)
@@ -232,7 +246,7 @@ int main(int argc, char **argv)
 						if (queues[priority-1].size() < queue_size)
 						{
 							// add packet
-							queues[priority-1].push(recv_packet);
+							queues[priority-1].push(Hop(recv_packet));
 							recv_packet = new L2Packet();
 						}
 						else
@@ -260,11 +274,25 @@ int main(int argc, char **argv)
 			// TODO: implement delay
 
 			bool packet_was_sent = false;
-			for (int i = 0; i < queues.size(); i++)
+			for (int i = 0; i < NUM_QUEUES; i++)
 			{
 				if (!queues[i].empty())
 				{
 					packet_was_sent = true;
+					//next_hop = queues[i].pop();
+					Hop next_hop = queues[i].front();
+
+					// Next address
+					next_addr.sin_family = AF_INET;
+					next_addr.sin_port = next_hop.next_port;
+					next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
+					bzero(&(next_addr.sin_zero), 8);
+
+					sendto(sock, next_hop.packet, next_hop.packet->l2_length(), 0,
+							(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+
+					queues[i].pop();
+
 					break;
 				}
 			}
