@@ -54,7 +54,7 @@ p1_2: all
 p2_t1: all
 	-cd test/emulator && rm emulator.txt
 	@echo 'Run emulator'
-	cd test/emulator && ../../emulator/Default/emulator -p 0 -q 0 -f table.txt -l 0 -d debug >> emulator.txt &
+	cd test/emulator && ../../emulator/Default/emulator -p 5000 -q 3 -f table.txt -l out.txt -d debug >> emulator.txt &
 	@echo 'Done'
 	
 p2_t1_a:
@@ -83,6 +83,28 @@ p2_t2_a:
 	gedit test/sender/sender.txt &
 	gedit test/requester/requester.txt &
 	gedit test/requester/hello.txt &
+	
+p2_te: all
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 5051 -q 3 -f table.txt -l out.txt -d debug >> emulator.txt
+	@echo 'Done'
+
+p2_tr: all
+	-cd test/requester && rm requester.txt
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 5050 -o hello.txt -f mumble-26 -h 5051 -w 0 -d debug >> requester.txt
+	@echo 'Done'
+	
+p2_t3: all
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 5000 -g 4000 -r 1 -q 0 -l 8 -f mumble-26 -h 5050 -i 2 -t 0 -d debug >> sender.txt &
+	sleep 1
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 5050 -o hello.txt -f mumble-26 -h 5000 -w 0 -d debug >> requester.txt &
+	@echo 'Done'
 	
 analyze:
 	@echo 'Open relevant logs'

@@ -27,6 +27,8 @@
 #include "packet.h"
 #include "counter.h"
 
+const char* domain = ".cs.wisc.edu";
+
 /*
  * TODO:
  *   Comment!
@@ -196,14 +198,44 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Set up socket connection
+	 * Set up send
 	 */
 
 	int sock;
 	int bytes_read; // <- note how this is now on its own line!
 	socklen_t addr_len; // <- and this too, with a different type.
+	struct sockaddr_in requester_addr, sender_addr, emu_addr;
+	struct hostent *emu_ent;
 
-	struct sockaddr_in requester_addr, sender_addr;
+	// Intermediate emulator destination
+	char* ip_lookup = new char[strlen(emu_hostname) + strlen(domain)];
+	ip_lookup = strcat(emu_hostname, domain);
+	emu_ent = (struct hostent *) gethostbyname(ip_lookup);
+
+	// Verify emulator exists
+	if ((struct hostent *) emu_ent == NULL)
+	{
+		// TODO: Gracefully handle missing sender
+		printf("Host was not found by the name of %s\n", emu_hostname);
+		exit(1);
+	}
+
+	emu_addr.sin_family = AF_INET;
+	emu_addr.sin_port = htons(emu_port);
+	emu_addr.sin_addr = *((struct in_addr *)emu_ent->h_addr);
+	bzero(&(emu_addr.sin_zero), 8);
+
+	if (0 && debug)
+	{
+		printf("IP emulator lookup: %s\n", ip_lookup);
+	    printf("Next hop: %s %u\n",
+			   inet_ntoa(emu_addr.sin_addr),
+			   ntohs(emu_addr.sin_port));
+	}
+
+	/*
+	 * Set up receive
+	 */
 
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 	{
@@ -338,7 +370,7 @@ int main(int argc, char **argv)
 			}
 
 			sendto(sock, send_packet, L1_HEADER + L2_HEADER, 0,
-					(struct sockaddr *)&requester_addr, sizeof(struct sockaddr));
+					(struct sockaddr *)&emu_addr, sizeof(struct sockaddr));
 		}
 		else
 		{

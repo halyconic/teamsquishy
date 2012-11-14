@@ -158,24 +158,6 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	1.     Receive packet from network in a non-blocking way. This means that you should not wait/get blocked in the recvfrom function until you get a packet. Check if you have received a packet; If not jump to 4,
-
-	2.     Once you receive a packet, decide whether packet is to be forwarded by consulting the forwarding table,
-
-	3.     Queue packet according to packet priority level if the queue is not full,
-
-	4.     If a packet is currently being delayed and the delay has not expired, goto Step 1.
-
-	5.     If no packet is currently being delayed, select the packet at the front of the queue with highest priority, remove that packet from the queue and delay it,
-
-	6.     When the delay expires, randomly determine whether to drop the packet,
-
-	7.     Otherwise, send the packet to the proper next hop.
-
-	8.     Goto Step 1.
-	 */
-
-	/*
 	 * Set up socket
 	 */
 
@@ -186,15 +168,22 @@ int main(int argc, char **argv)
 
 	struct sockaddr_in emulator_addr, next_addr;
 
+	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
 	// Own address
 	emulator_addr.sin_family = AF_INET;
 	emulator_addr.sin_port = htons(port);
 	emulator_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	bzero(&(emulator_addr.sin_zero), 8);
 
-	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	// Bind port to listen on
+	if (bind(sock, (struct sockaddr *) &emulator_addr, sizeof(struct sockaddr)) == -1)
 	{
-		perror("Socket");
+		perror("Bind");
 		exit(1);
 	}
 
@@ -219,10 +208,20 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		bytes_read = recvfrom(sock, *recv_packet, L1_HEADER + L2_HEADER + DEFAULT_PAYLOAD, flags,
-				(struct sockaddr *) &emulator_addr, &addr_len);
+				(struct sockaddr *) &next_addr, &addr_len);
 
-		if (bytes_read != 0)
+		if (bytes_read >= 0)
 		{
+			if (debug)
+			{
+				printf("Packet received:\n");
+				recv_packet->print();
+				printf("Bytes read: %d\n", bytes_read);
+			    printf("Origin: %s %u\n\n",
+					   inet_ntoa(next_addr.sin_addr),
+					   ntohs(next_addr.sin_port));
+			}
+
 			bool packet_found = false;
 
 			// check forwarding table
@@ -287,6 +286,16 @@ int main(int argc, char **argv)
 					next_addr.sin_port = next_hop.next_port;
 					next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
 					bzero(&(next_addr.sin_zero), 8);
+
+					if (debug)
+					{
+						printf("Packet sent:\n");
+						next_hop.packet->print();
+						printf("Bytes read: %d\n", bytes_read);
+					    printf("Destination: %s %u\n\n",
+							   inet_ntoa(next_addr.sin_addr),
+							   ntohs(next_addr.sin_port));
+					}
 
 					sendto(sock, next_hop.packet, next_hop.packet->l2_length(), 0,
 							(struct sockaddr *) &next_addr, sizeof(struct sockaddr));

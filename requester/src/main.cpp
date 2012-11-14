@@ -239,7 +239,6 @@ int main(int argc, char **argv)
 	int send_sock, recv_sock;
 	struct sockaddr_in requester_addr, sender_addr, emu_addr;
 	struct hostent *emu_ent, *dest_ent;
-	//char recv_data[MAX_DATA];
 	int bytes_read;
 	socklen_t addr_len;
 
@@ -257,13 +256,10 @@ int main(int argc, char **argv)
 	sender_addr.sin_family = AF_INET;
 	addr_len = sizeof(struct sockaddr);
 
-	// Intermediate emulator
+	// Intermediate emulator destination
 	char* ip_lookup = new char[strlen(emu_hostname) + strlen(domain)];
 	ip_lookup = strcat(emu_hostname, domain);
 	emu_ent = (struct hostent *) gethostbyname(ip_lookup);
-
-	if (0 && debug)
-		printf("IP lookup: %s\n", ip_lookup);
 
 	// Verify emulator exists
 	if ((struct hostent *) emu_ent == NULL)
@@ -277,6 +273,14 @@ int main(int argc, char **argv)
 	emu_addr.sin_port = htons(emu_port);
 	emu_addr.sin_addr = *((struct in_addr *)emu_ent->h_addr);
 	bzero(&(emu_addr.sin_zero), 8);
+
+	if (debug)
+	{
+		printf("IP emulator lookup: %s\n", ip_lookup);
+	    printf("Next hop: %s %u\n",
+			   inet_ntoa(emu_addr.sin_addr),
+			   ntohs(emu_addr.sin_port));
+	}
 
 	/*
 	 * Set up receive
@@ -338,9 +342,9 @@ int main(int argc, char **argv)
 			ip_lookup_dest = strcat(tracker[i].machinename, domain);
 			dest_ent = (struct hostent *) gethostbyname(ip_lookup_dest);
 
-			if (0 && debug)
+			if (debug)
 			{
-				printf("IP lookup: %s\n", ip_lookup);
+				printf("IP dest lookup: %s\n", ip_lookup_dest);
 			}
 
 			// Verify sender exists
@@ -374,8 +378,8 @@ int main(int argc, char **argv)
 				printf("Packet being sent:\n");
 				send_packet.print();
 			    printf("Destination: %s %u\n",
-					   inet_ntoa(emu_addr.sin_addr),
-					   ntohs(emu_addr.sin_port));
+					   inet_ntoa(sender_addr.sin_addr),
+					   ntohs(sender_addr.sin_port));
 			}
 
 			sendto(send_sock, send_packet, send_packet.l2_length(), 0,
