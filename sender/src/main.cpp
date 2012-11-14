@@ -309,20 +309,23 @@ int main(int argc, char **argv)
 			exit(-1);
 		}
 
-		char send_buffer[length];
 		file_size = filestr.tellg();
 		filestr.seekg(0, std::ios::beg);
 
 		Counter counter = Counter(rate);
 
 		L2Packet* send_packets = new L2Packet[window_size];
+		std::vector<std::pair<Counter, unsigned int> > timeout_tracker;
 
 		while (filestr.good())
 		{
-			for (int i = 0; i < window_size; i++)
+			// Cache batch of packets to send
+			for (unsigned int i = 0; i < window_size; i++)
 			{
 				if (debug)
 					printf("Beginning to read from file.\n");
+
+				L2Packet send_packet = send_packets[i];
 
 				send_packet.clear();
 
@@ -338,8 +341,22 @@ int main(int argc, char **argv)
 				filestr.read(send_packet.payload(), length);
 				send_packet.length() = (unsigned int) filestr.gcount();
 				send_packet.l1_length() = send_packet.length() + L1_HEADER;
+
+				// Create entry if data is left to be sent
 				if (send_packet.length() !=0)
+					timeout_tracker.push_back(std::pair<Counter, unsigned int>(Counter(rate), i));
+			}
+
+			// Check for ack packets and send as necessary
+			while (!timeout_tracker.empty())
+			{
+				// send batch
+				for (unsigned int i = 0; i < timeout_tracker.size(); i++)
 				{
+					unsigned int key = timeout_tracker[i].second;
+					L2Packet send_packet = send_packets[key];
+
+					// Send packets
 					if (debug)
 					{
 						printf("Packet being sent:\n");
@@ -356,6 +373,11 @@ int main(int argc, char **argv)
 					seq_no += 1;
 					counter.wait();
 				}
+
+				// ack receive
+				bytes_read = recvfrom(sock, recv_packet, recv_packet.l2_length(), MSG_DONTWAIT,
+					(struct sockaddr *) &requester_addr, &addr_len);
+
 			}
 		}
 

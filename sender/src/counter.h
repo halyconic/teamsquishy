@@ -21,6 +21,9 @@ public:
 	// Return true and reset last_time if timeout has expired
 	bool check();
 
+	// reconstruct counter
+	void reset();
+
 	struct timeval last_time;
 	struct timeval wait_time;
 };
