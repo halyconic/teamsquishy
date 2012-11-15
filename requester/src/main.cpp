@@ -23,7 +23,6 @@
 //#include <errno.h>
 #include <string.h>
 #include <cstdlib> //strtol
-#include <vectors>
 
 #include "tracker.h"
 #include "packet.h"
@@ -472,7 +471,7 @@ int main(int argc, char **argv)
 					   ntohs(sender_addr.sin_port));
 			}
 
-			sendto(send_sock, ack_packet, ack_packet.l2_length(), 0,
+			sendto(send_sock, ack_packet, L1_HEADER + L2_HEADER, 0,
 					(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
 		}
 		else if (recv_packet->type() == 'E')
@@ -527,7 +526,7 @@ int main(int argc, char **argv)
 	printf("Total data packets received: %d\n", packets_list.size());
 
 	//total data bytes received
-	int sum_of_bytes;
+	int sum_of_bytes = 0;
 	for (unsigned int i = 0; i < packets_list.size(); i++)
 	{
 		sum_of_bytes += packets_list.at(i).packet->length();
@@ -542,7 +541,7 @@ int main(int argc, char **argv)
 	double avg_diff_ms;
 	double avg_diff_us;
 	Super_Packet next_packet = packets_list.at(0);
-	for (int i = 0; i < packets_list.size(); i++)
+	for (unsigned int i = 0; i < packets_list.size(); i++)
 	{
 		if (packets_list.at(i).packet->type() == 'D')
 		{
