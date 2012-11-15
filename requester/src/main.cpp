@@ -422,6 +422,9 @@ int main(int argc, char **argv)
 	gettimeofday(&begin_time, NULL);
 	while (num_active_senders > 0)
 	{
+		if (debug)
+			fflush(stdout);
+
 		L2Packet* recv_packet = new L2Packet();
 
 		bytes_read = recvfrom(recv_sock, *recv_packet, recv_packet->l2_length(), 0,
@@ -585,12 +588,19 @@ int main(int argc, char **argv)
 			tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
 			tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-	// Print out to file
+	/*
+	 * Print to file
+	 */
+
+	unsigned int last_seq_no = 0;
 	std::ofstream myfile;
 	myfile.open (file_option);
 	for (unsigned int i = 0; i < packets_list.size(); i++)
 	{
-		myfile << packets_list.at(i).packet->payload();
+		if (last_seq_no != packets_list.at(i).packet->seq())
+			myfile << packets_list.at(i).packet->payload();
+
+		last_seq_no = packets_list.at(i).packet->seq();
 	}
 	myfile.close();
 }

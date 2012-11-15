@@ -99,7 +99,7 @@ p2_tr: all
 p2_ts: all
 	-cd test/sender && rm sender.txt
 	@echo 'Run sender'
-	cd test/sender && ../../sender/Default/sender -p 5000 -g 5050 -r 1 -q 0 -l 8 -f mumble-27 -h 5050 -i 2 -t 2000 -d debug >> sender.txt
+	cd test/sender && ../../sender/Default/sender -p 5000 -g 5050 -r 1 -q 1 -l 8 -f mumble-27 -h 5050 -i 2 -t 2000 -d debug >> sender.txt
 	@echo 'Done'
 	
 p2_t3: all
@@ -111,7 +111,13 @@ p2_t3: all
 	@echo 'Run requester'
 	cd test/requester && ../../requester/Default/requester -p 5050 -o hello.txt -f mumble-26 -h 5000 -w 0 -d debug >> requester.txt &
 	@echo 'Done'
-	
+
+p2_1:
+p2_2:
+p2_3:
+p2_4:
+p2_5:
+
 analyze:
 	@echo 'Open relevant logs'
 	gedit test/requester/tracker.txt &

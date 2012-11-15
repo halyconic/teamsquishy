@@ -52,7 +52,7 @@ bool Counter::check()
 	time_elapsed.tv_usec = curr_time.tv_usec - last_time.tv_usec;
 
 	// wait (time_to_wait - time_elapsed_millisec)
-	if (wait_time.tv_usec > time_elapsed.tv_usec)
+	if (wait_time.tv_usec < time_elapsed.tv_usec)
 		return false;
 
 	gettimeofday(&last_time, NULL);
