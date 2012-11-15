@@ -209,6 +209,7 @@ int main(int argc, char **argv)
 	{
 		bytes_read = recvfrom(sock, *recv_packet, L1_HEADER + L2_HEADER + DEFAULT_PAYLOAD, flags,
 				(struct sockaddr *) &next_addr, &addr_len);
+		fflush(stdout);
 
 		if (bytes_read >= 0)
 		{

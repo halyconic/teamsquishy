@@ -27,6 +27,7 @@ clean:
 	-cd test/requester && rm requester.txt
 	-cd test/requester && rm hello.txt
 	-cd test/requester && rm split.txt
+	-cd test/requester && rm file.txt
 
 p1_1: all
 	-cd test/sender && rm sender.txt
@@ -87,13 +88,19 @@ p2_t2_a:
 p2_te: all
 	-cd test/emulator && rm emulator.txt
 	@echo 'Run emulator'
-	cd test/emulator && ../../emulator/Default/emulator -p 5051 -q 3 -f table.txt -l out.txt -d debug >> emulator.txt
+	cd test/emulator && ../../emulator/Default/emulator -p 5000 -q 3 -f table.txt -l out.txt -d debug >> emulator.txt
 	@echo 'Done'
 
 p2_tr: all
 	-cd test/requester && rm requester.txt
 	@echo 'Run requester'
-	cd test/requester && ../../requester/Default/requester -p 5050 -o hello.txt -f mumble-26 -h 5051 -w 0 -d debug >> requester.txt
+	cd test/requester && ../../requester/Default/requester -p 5050 -o file.txt -f mumble-27 -h 5000 -w 5 -d debug >> requester.txt
+	@echo 'Done'
+	
+p2_ts: all
+	-cd test/sender && rm sender.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 5000 -g 5050 -r 1 -q 1 -l 8 -f mumble-27 -h 5050 -i 2 -t 2000 -d debug >> sender.txt
 	@echo 'Done'
 	
 p2_t3: all
@@ -105,7 +112,87 @@ p2_t3: all
 	@echo 'Run requester'
 	cd test/requester && ../../requester/Default/requester -p 5050 -o hello.txt -f mumble-26 -h 5000 -w 0 -d debug >> requester.txt &
 	@echo 'Done'
-	
+
+p2_1: all
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-01 -h 3000 -i 2 -t 100 -d debug >> sender.txt &
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table1 -l log01 -d debug >> emulator.txt &
+	sleep 1
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-01 -h 3000 -o file.txt -w 100 -d debug >> requester.txt &
+
+p2_2: all
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 10 -q 1 -l 100 -f mumble-01 -h 5000 -i 2 -t 100 -d debug >> sender.txt &
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 5000 -q 100 -f table2 -l log02 -d debug >> emulator.txt &
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table2 -l log12 -d debug >> emulator.txt &
+	sleep 1
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-01 -h 3000 -o file.txt -w 100 -d debug >> requester.txt &
+
+p2_3:
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-01 -h 3000 -i 3 -t 100 -d debug >> sender.txt &
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table3 -l log03 -d debug >> emulator.txt &
+	sleep 1
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-01 -h 3000 -o file.txt -w 10 -d debug >> requester.txt &
+
+p2_4:
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 10 -f mumble-01 -h 3000 -i 3 -t 100 -d debug >> sender.txt &
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 10 -f table4 -l log04 -d debug >> emulator.txt &
+	sleep 1
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-01 -h 3000 -o file.txt -w 100 -d debug >> requester.txt &
+
+p2_5:
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 10 -q 1 -l 100 -f mumble-01 -h 3000 -i 2 -t 100 -d debug >> sender.txt &
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table5 -l log05 -d debug >> emulator.txt &
+	sleep 1
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-01 -h 3000 -o file.txt -w 100 -d debug >> requester.txt &
+
+p2_6:
+	-cd test/sender && rm sender.txt
+	-cd test/requester && rm requester.txt
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 1 -q 1 -l 100 -f mumble-01 -h 3000 -i 3 -t 100 -d debug >> sender.txt &
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table6 -l log06 -d debug >> emulator.txt &
+	sleep 1
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-01 -h 3000 -o file.txt -w 1 -d debug >> requester.txt &
+
+p2_a:
+	gedit test/emulator/emulator.txt &
+	gedit test/sender/sender.txt &
+	gedit test/requester/requester.txt &
+	gedit test/requester/file.txt &
+
 analyze:
 	@echo 'Open relevant logs'
 	gedit test/requester/tracker.txt &
