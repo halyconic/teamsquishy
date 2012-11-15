@@ -22,7 +22,7 @@ public:
 	bool check();
 
 	// reconstruct counter
-	void reset();
+	void reset(unsigned int microseconds);
 
 	struct timeval last_time;
 	struct timeval wait_time;

@@ -196,7 +196,7 @@ int main(int argc, char **argv)
 
 	unsigned long int port = strtoul(arg_port, NULL, 0);
 	unsigned long int emu_port = strtoul(arg_emu_port, NULL, 0);
-	unsigned long int window = strtoul(arg_window, NULL, 0);
+	unsigned long int window_size = strtoul(arg_window, NULL, 0);
 
 	// Aliases
 	char* file_option = arg_file_option;
@@ -366,7 +366,7 @@ int main(int argc, char **argv)
 			L2Packet send_packet = L2Packet(strlen(file_option));
 			send_packet.type() = 'R';
 			send_packet.seq() = 0;
-			send_packet.length() = 0;
+			send_packet.length() = window_size;
 			send_packet.priority() = 1;
 			send_packet.src_ip_addr() = requester_addr.sin_addr.s_addr;
 			send_packet.src_port() = requester_addr.sin_port;

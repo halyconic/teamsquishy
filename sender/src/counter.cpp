@@ -37,6 +37,12 @@ void Counter::wait()
 	gettimeofday(&last_time, NULL);
 }
 
+void Counter::reset(unsigned int timeout)
+{
+	wait_time.tv_usec = 1000 * timeout;
+	gettimeofday(&last_time, NULL);
+}
+
 bool Counter::check()
 {
 	struct timeval curr_time;

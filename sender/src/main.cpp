@@ -278,6 +278,7 @@ int main(int argc, char **argv)
 		printf("Origin: %s %u\n\n",
 			   inet_ntoa(requester_addr.sin_addr),
 			   ntohs(requester_addr.sin_port));
+		fflush(stdout);
 	}
 
 	// Set destination port of requester
@@ -317,6 +318,12 @@ int main(int argc, char **argv)
 		L2Packet* send_packets = new L2Packet[window_size];
 		std::vector<std::pair<Counter, unsigned int> > timeout_tracker;
 
+		// Reset timeout for initial packets
+		for (unsigned int i = 0; i < timeout_tracker.size(); i++)
+		{
+			timeout_tracker[i].first.reset(timeout);
+		}
+
 		while (filestr.good())
 		{
 			// Cache batch of packets to send
@@ -345,6 +352,9 @@ int main(int argc, char **argv)
 				// Create entry if data is left to be sent
 				if (send_packet.length() !=0)
 					timeout_tracker.push_back(std::pair<Counter, unsigned int>(Counter(rate), i));
+
+				printf("Beginning loop1\n");
+				fflush(stdout);
 			}
 
 			// Check for ack packets and send as necessary
