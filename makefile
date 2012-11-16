@@ -118,12 +118,35 @@ p2_1: all
 	-cd test/requester && rm requester.txt
 	-cd test/emulator && rm emulator.txt
 	@echo 'Run sender'
+<<<<<<< HEAD
 	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-14 -h 3001 -i 2 -t 100 -d debug >> sender.txt &
+=======
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-13 -h 3000 -i 2 -t 100 -d debug >> sender.txt &
+>>>>>>> ee5ae30a4d739dc2a7ef9a094150abe456b0cb62
 	@echo 'Run emulator'
 	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table1.txt -l log01 -d debug >> emulator.txt &
 	sleep 1
 	@echo 'Run requester'
+<<<<<<< HEAD
 	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-14 -h 3000 -o file.txt -w 100 -d debug >> requester.txt &
+=======
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-13 -h 3000 -o hello.txt -w 100 -d debug >> requester.txt &
+
+p2_1s: all
+	-cd test/sender && rm sender.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-13 -h 3000 -i 2 -t 100 -d debug
+	
+p2_1e: all
+	-cd test/emulator && rm emulator.txt
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table1.txt -l log01 -d debug >> emulator.txt
+	
+p2_1r: all
+	-cd test/requester && rm requester.txt
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-13 -h 3000 -o hello.txt -w 100 -d debug >> requester.txt
+>>>>>>> ee5ae30a4d739dc2a7ef9a094150abe456b0cb62
 
 p2_2: all
 	-cd test/sender && rm sender.txt

@@ -19,12 +19,14 @@ ForwardEntry::ForwardEntry(
 		char* d_h, unsigned short int d_p,
 		char* n_h, unsigned short int n_p,
 		unsigned int d, unsigned char l) :
-	emu_port(e_p),
-	dest_port(d_p),
-	next_port(n_p),
 	delay(d),
 	loss(l)
 {
+	// Set ports to network order
+	emu_port = htons(e_p);
+	dest_port = htons(d_p);
+	next_port = htons(n_p);
+
 	// create a buffer for ip_lookup
 	char* ip_lookup;
 	struct hostent * ip_buffer;

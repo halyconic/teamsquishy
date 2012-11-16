@@ -278,7 +278,7 @@ int main(int argc, char **argv)
 				printf("Bytes read: %d\n", bytes_read);
 			    printf("Origin: %s %d\n\n",
 					   inet_ntoa(next_addr.sin_addr),
-					   ntohs(next_addr.sin_port));
+					   htons(next_addr.sin_port));
 			}
 
 			bool packet_found = false;
@@ -286,8 +286,15 @@ int main(int argc, char **argv)
 			// check forwarding table
 			for (unsigned int i = 0; i < forward_table.size(); i++)
 			{
-				if (recv_packet->dest_ip_addr() == forward_table[i].dest_ip)
+				if (recv_packet->dest_ip_addr() == forward_table[i].dest_ip &&
+					recv_packet->dest_port() == forward_table[i].dest_port)
 				{
+					if (debug)
+					{
+						printf("Matching entry:\n");
+						forward_table[i].print();
+					}
+
 					packet_found = true;
 
 					unsigned char priority = recv_packet->priority();
@@ -355,7 +362,7 @@ int main(int argc, char **argv)
 
 					// Next address
 					next_addr.sin_family = AF_INET;
-					next_addr.sin_port = htons(next_hop.next_port);
+					next_addr.sin_port = next_hop.next_port;
 					next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
 					bzero(&(next_addr.sin_zero), 8);
 
@@ -365,7 +372,7 @@ int main(int argc, char **argv)
 						next_hop.packet->print();
 					    printf("Destination: %s %d\n\n",
 							   inet_ntoa(next_addr.sin_addr),
-							   ntohs(next_addr.sin_port));
+							   htons(next_addr.sin_port));
 					}
 
 					sendto(sock, next_hop.packet, next_hop.packet->l2_length(), 0,
