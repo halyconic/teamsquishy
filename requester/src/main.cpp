@@ -590,7 +590,6 @@ int main(int argc, char **argv)
 	/*
 	 * Print to file
 	 */
-
 	unsigned int last_seq_no = 0;
 	std::ofstream myfile;
 	myfile.open (file_option);
