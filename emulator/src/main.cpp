@@ -299,9 +299,7 @@ int main(int argc, char **argv)
 						delete recv_packet;
 						recv_packet = new L2Packet();
 
-
-
-						dropPacketLog(PRIORITY_QUEUE_FULL, log_filename, recv_packet);
+						dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
 					}
 					else
 					{
