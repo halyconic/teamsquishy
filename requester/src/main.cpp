@@ -443,11 +443,8 @@ int main(int argc, char **argv)
 	 * Listen for packets (Listen until end packet)
 	 */
 
-	if (debug)
-	{
-		printf("Requester waiting for sender on port %lu\n", port);
-		fflush(stdout);
-	}
+	printf("Requester waiting for sender on port %lu\n", port);
+	fflush(stdout);
 
 	// Initialize immutable components of ack packet
 	L2Packet ack_packet = L2Packet(0);
