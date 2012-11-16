@@ -240,3 +240,8 @@ analyze:
 	gedit test/requester/split.txt &
 	gedit test/emulator/emulator.txt &
 	@echo 'Done'
+	
+replace:
+	sed -i $(arg1) makefile
+	sed -i $(arg1) test/requester/tracker.txt
+	sed -i $(arg1) test/emulator/t*txt
