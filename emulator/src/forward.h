@@ -48,11 +48,11 @@ public:
 	{
 		printf("%o %d %o %d %o %d %d %d\n",
 				emu_ip,
-				emu_port,
+				htons(emu_port),
 				dest_ip,
-				dest_port,
+				htons(dest_port),
 				next_ip,
-				next_port,
+				htons(next_port),
 				delay,
 				loss);
 	}
