@@ -95,7 +95,7 @@ void drop_packet_log(int reason, char* file_option, L2Packet* p)
 
 bool evaluate_packet_loss(int floor, int ceiling)
 {
-	/*srand((unsigned)time(0));
+/*	srand((unsigned)time(0));
 	int range = (ceiling - floor);
 	int rnd = floor + int((range * rand()) / (RAND_MAX + 1.0));
 
