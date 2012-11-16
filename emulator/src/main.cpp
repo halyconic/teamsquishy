@@ -218,7 +218,7 @@ int main(int argc, char **argv)
 				printf("Packet received:\n");
 				recv_packet->print();
 				printf("Bytes read: %d\n", bytes_read);
-			    printf("Origin: %s %u\n\n",
+			    printf("Origin: %s %d\n\n",
 					   inet_ntoa(next_addr.sin_addr),
 					   ntohs(next_addr.sin_port));
 			}
@@ -246,7 +246,10 @@ int main(int argc, char **argv)
 						if (queues[priority-1].size() < queue_size)
 						{
 							// add packet
-							queues[priority-1].push(Hop(recv_packet));
+							queues[priority-1].push(Hop(
+									recv_packet,
+									forward_table[i].next_ip,
+									forward_table[i].next_port));
 							recv_packet = new L2Packet();
 						}
 						else
@@ -284,7 +287,7 @@ int main(int argc, char **argv)
 
 					// Next address
 					next_addr.sin_family = AF_INET;
-					next_addr.sin_port = next_hop.next_port;
+					next_addr.sin_port = htons(next_hop.next_port);
 					next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
 					bzero(&(next_addr.sin_zero), 8);
 
@@ -292,8 +295,7 @@ int main(int argc, char **argv)
 					{
 						printf("Packet sent:\n");
 						next_hop.packet->print();
-						printf("Bytes read: %d\n", bytes_read);
-					    printf("Destination: %s %u\n\n",
+					    printf("Destination: %s %d\n\n",
 							   inet_ntoa(next_addr.sin_addr),
 							   ntohs(next_addr.sin_port));
 					}

@@ -125,10 +125,10 @@ int main(int argc, char **argv)
 			arg_port = optarg;
 			break;
 		case 'o':
-			arg_file_option = optarg;
+			arg_file_option = strdup(optarg);
 			break;
 		case 'f':
-			arg_emu_hostname = optarg;
+			arg_emu_hostname = strdup(optarg);
 			break;
 		case 'h':
 			arg_emu_port = optarg;
@@ -198,8 +198,8 @@ int main(int argc, char **argv)
 	unsigned long int window_size = strtoul(arg_window, NULL, 0);
 
 	// Aliases
-	char* file_option = arg_file_option;
 	char* emu_hostname = arg_emu_hostname;
+	char* file_option = arg_file_option;
 
 	/*
 	 * Verify variables are within the correct range
@@ -236,22 +236,58 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// Set up socket connection
-	int send_sock, recv_sock;
-	struct sockaddr_in requester_addr, sender_addr, emu_addr;
-	struct hostent *emu_ent, *dest_ent;
+	/*
+	 * Declare useful variables
+	 */
+
+	int send_sock, recv_sock, curr_sock;
+	struct sockaddr_in requester_addr, sender_addr, emu_addr, curr_addr;
+	struct hostent *emu_ent, *dest_ent, *curr_ent;
 	int bytes_read;
 	socklen_t addr_len;
+
+	/*
+	 * Cache current location
+	 */
+
+	if ((curr_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+    const char* google_dns_ip = "8.8.8.8";
+    uint16_t dns_port = 53;
+    struct sockaddr_in lookup_serv_addr;
+    memset(&lookup_serv_addr, 0, sizeof(lookup_serv_addr));
+    lookup_serv_addr.sin_family = AF_INET;
+    lookup_serv_addr.sin_addr.s_addr = inet_addr(google_dns_ip);
+    lookup_serv_addr.sin_port = htons(dns_port);
+
+    int err = connect(curr_sock, (const sockaddr*) &lookup_serv_addr, sizeof(lookup_serv_addr));
+    // TODO: verify err != -1
+
+    socklen_t namelen = sizeof(curr_addr);
+    err = getsockname(curr_sock, (sockaddr*) &curr_addr, &namelen);
+    // TODO: verify err != -1
+
+    if (debug)
+	{
+		printf("Own address: %s %u\n",
+			   inet_ntoa(curr_addr.sin_addr),
+			   ntohs(curr_addr.sin_port));
+	}
+	close(curr_sock);
+
+	/*
+	 * Set up send
+	 */
 
 	if ((send_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 	{
 		perror("Socket");
 		exit(1);
 	}
-
-	/*
-	 * Set up send
-	 */
 
 	// Where we are sending to
 	sender_addr.sin_family = AF_INET;
@@ -324,7 +360,7 @@ int main(int argc, char **argv)
 		{
 			num_active_senders++;
 
-			if (0 && debug)
+			if (debug)
 			{
 				printf("Entry acknowledged:\n");
 				printf("%s %d %s %d\n",
@@ -367,8 +403,8 @@ int main(int argc, char **argv)
 			send_packet.seq() = 0;
 			send_packet.length() = window_size;
 			send_packet.priority() = 1;
-			send_packet.src_ip_addr() = requester_addr.sin_addr.s_addr;
-			send_packet.src_port() = requester_addr.sin_port;
+			send_packet.src_ip_addr() = curr_addr.sin_addr.s_addr;
+			send_packet.src_port() = curr_addr.sin_port;
 			send_packet.dest_ip_addr() = sender_addr.sin_addr.s_addr;
 			send_packet.dest_port() = sender_addr.sin_port;
 			send_packet.l1_length() = L1_HEADER;
@@ -461,11 +497,12 @@ int main(int argc, char **argv)
 			ack_packet.seq() = recv_packet->seq();
 			ack_packet.dest_ip_addr() = recv_packet->src_ip_addr();
 			ack_packet.dest_port() = recv_packet->src_port();
-			ack_packet.src_ip_addr() = requester_addr.sin_addr.s_addr;
-			ack_packet.src_port() = requester_addr.sin_port;
+			ack_packet.src_ip_addr() = curr_addr.sin_addr.s_addr;
+			ack_packet.src_port() = curr_addr.sin_port;
 
 			if (debug)
 			{
+				ack_packet.print();
 				printf("Ack sent to destination: %s %u\n\n",
 					   inet_ntoa(sender_addr.sin_addr),
 					   ntohs(sender_addr.sin_port));

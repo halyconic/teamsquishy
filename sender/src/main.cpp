@@ -198,14 +198,51 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Set up send
+	 * Declare useful variables
 	 */
 
-	int sock;
+	int sock, curr_sock;
 	int bytes_read; // <- note how this is now on its own line!
 	socklen_t addr_len; // <- and this too, with a different type.
-	struct sockaddr_in requester_addr, sender_addr, emu_addr;
+	struct sockaddr_in requester_addr, sender_addr, emu_addr, curr_addr;
 	struct hostent *emu_ent;
+
+	/*
+	 * Cache current location
+	 */
+
+	if ((curr_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+    const char* google_dns_ip = "8.8.8.8";
+    uint16_t dns_port = 53;
+    struct sockaddr_in lookup_serv_addr;
+    memset(&lookup_serv_addr, 0, sizeof(lookup_serv_addr));
+    lookup_serv_addr.sin_family = AF_INET;
+    lookup_serv_addr.sin_addr.s_addr = inet_addr(google_dns_ip);
+    lookup_serv_addr.sin_port = htons(dns_port);
+
+    int err = connect(curr_sock, (const sockaddr*) &lookup_serv_addr, sizeof(lookup_serv_addr));
+    // TODO: verify err != -1
+
+    socklen_t namelen = sizeof(curr_addr);
+    err = getsockname(curr_sock, (sockaddr*) &curr_addr, &namelen);
+    // TODO: verify err != -1
+
+    if (debug)
+	{
+		printf("Own address: %s %u\n",
+			   inet_ntoa(curr_addr.sin_addr),
+			   ntohs(curr_addr.sin_port));
+	}
+	close(curr_sock);
+
+	/*
+	 * Set up send
+	 */
 
 	// Intermediate emulator destination
 	char* ip_lookup = new char[strlen(emu_hostname) + strlen(domain)];
@@ -344,8 +381,8 @@ int main(int argc, char **argv)
 				send_packet->type() = 'D';
 				send_packet->seq() = seq_no;
 				send_packet->priority() = priority;
-				send_packet->src_ip_addr() = sender_addr.sin_addr.s_addr;
-				send_packet->src_port() = sender_addr.sin_port;
+				send_packet->src_ip_addr() = curr_addr.sin_addr.s_addr;
+				send_packet->src_port() = curr_addr.sin_port;
 				send_packet->dest_ip_addr() = requester_addr.sin_addr.s_addr;
 				send_packet->dest_port() = requester_addr.sin_port;
 
@@ -445,8 +482,8 @@ int main(int argc, char **argv)
 		send_packet.type() = 'E';
 		send_packet.seq() = seq_no;
 		send_packet.priority() = priority;
-		send_packet.src_ip_addr() = sender_addr.sin_addr.s_addr;
-		send_packet.src_port() = sender_addr.sin_port;
+		send_packet.src_ip_addr() = curr_addr.sin_addr.s_addr;
+		send_packet.src_port() = curr_addr.sin_port;
 		send_packet.dest_ip_addr() = requester_addr.sin_addr.s_addr;
 		send_packet.dest_port() = requester_addr.sin_port;
 
