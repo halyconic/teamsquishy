@@ -34,14 +34,17 @@ public:
 	unsigned int next_ip_addr;
 	unsigned short int next_port;
 	unsigned int delay;
+	unsigned short int loss;
+
 
 	Hop() {;}
 
-	Hop(L2Packet* p, unsigned int i = 0, unsigned short int n = 0, unsigned int d = 0) :
+	Hop(L2Packet* p, unsigned int i = 0, unsigned short int n = 0, unsigned int d = 0, unsigned short int l = 0) :
 		packet(p),
 		next_ip_addr(i),
 		next_port(n),
-		delay(d) {;}
+		delay(d),
+		loss(l) {;}
 };
 
 void dropPacketLog(int reason, std::ofstream& log_stream, L2Packet* p)
@@ -380,7 +383,8 @@ int main(int argc, char **argv)
 									recv_packet,
 									forward_table[i].next_ip,
 									forward_table[i].next_port,
-									forward_table[i].delay));
+									forward_table[i].delay,
+									forward_table[i].loss));
 							recv_packet = new L2Packet();
 						}
 						else
@@ -420,7 +424,7 @@ int main(int argc, char **argv)
 					delay_counter.wait();
 
 					// Drop packets randomly
-					if (evaluate_packet_loss(0, 50) && next_hop.packet->type() != 'R' && next_hop.packet->type() != 'D')
+					if (evaluate_packet_loss(0, next_hop.loss) && next_hop.packet->type() != 'R' && next_hop.packet->type() != 'D')
 					{
 						//Drop and log
 						dropPacketLog(LOSS_EVENT, log_stream, recv_packet);
