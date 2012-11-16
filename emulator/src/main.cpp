@@ -9,6 +9,7 @@
 #include <ctype.h>  //isprint
 #include <stdlib.h> //exit
 #include <stdio.h>
+#include <fstream>
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -43,14 +44,10 @@ public:
 		delay(d) {;}
 };
 
-void dropPacketLog(int reason, char* file_option, L2Packet* p)
+void dropPacketLog(int reason, std::ofstream& log_stream, L2Packet* p)
 {
-	// file setup
-	std::ofstream myfile;
-	myfile.open (file_option);
-
 	// print out packet properties
-	p->print();
+	// p->print();
 
 	// print out current time (to millisecond granularity)
 	time_t now;
@@ -59,40 +56,43 @@ void dropPacketLog(int reason, char* file_option, L2Packet* p)
 	now = time(0);
 	if ((tm = localtime (&now)) == NULL)
 	{
-		printf ("Error extracting time stuff\n");
-		myfile << "Error extracting time stuff\n";
+		//printf ("Error extracting time stuff\n");
+		log_stream << "Error extracting time stuff\n";
 	}
 
-	printf ("%04d-%02d-%02d %02d:%02d:%02d\n",
-			tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
-			tm->tm_hour, tm->tm_min, tm->tm_sec);
+//	printf ("%04d-%02d-%02d %02d:%02d:%02d\n",
+//			tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+//			tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-	myfile << tm->tm_year+1900;
-	myfile << tm->tm_mon+1;
-	myfile << tm->tm_mday;
-	myfile << tm->tm_hour;
-	myfile << tm->tm_min;
-	myfile << tm->tm_sec;
+	log_stream << tm->tm_year+1900 << " ";
+	log_stream << tm->tm_mon+1 << "-";
+	log_stream << tm->tm_mday << " ";
+	log_stream << tm->tm_hour << "h ";
+	log_stream << tm->tm_min << "m ";
+	log_stream << tm->tm_sec << "s ";
+	log_stream << std::endl;
 
 	// write reason to log file
 	switch (reason)
 	{
 	case NO_FORWARDING_ENTRY_FOUND:
-		myfile << "No forwarding table entry found";
+		log_stream << "No forwarding table entry found";
 		break;
 	case PRIORITY_QUEUE_FULL:
-		myfile << "Priority queue was full";
+		log_stream << "Priority queue was full";
 		break;
 	case LOSS_EVENT:
-		myfile << "Loss event occurred";
+		log_stream << "Loss event occurred";
 		break;
 	default:
-		myfile << "Uncaught reason for packet loss";
+		log_stream << "Uncaught reason for packet loss";
 	}
 
-	myfile << "\n";
+	log_stream << std::endl;
+	log_stream.flush();
 }
 
+// Returns true if dropped
 bool evaluate_packet_loss(int floor, int ceiling)
 {
 	srand((unsigned)time(0));
@@ -101,7 +101,7 @@ bool evaluate_packet_loss(int floor, int ceiling)
 
 	if (rnd <= ceiling)
 	{
-		printf("packet is being lost due to lossy link");
+		//printf("packet is being lost due to lossy link");
 		return true;
 	}
 	else
@@ -244,6 +244,12 @@ int main(int argc, char **argv)
 	int flags = MSG_DONTWAIT;
 	struct sockaddr_in emulator_addr, next_addr, curr_addr;
 
+	// log setup
+	std::ofstream log_stream;
+	log_stream.open(log_filename);
+	log_stream << "Beginning log.\n";
+	log_stream.flush();
+
 	/*
 	 * Cache current location
 	 */
@@ -361,7 +367,7 @@ int main(int argc, char **argv)
 					{
 						// Print error to logstream
 						// drop packet
-						dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
+						dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_stream, recv_packet);
 						delete recv_packet;
 						recv_packet = new L2Packet();
 					}
@@ -380,7 +386,7 @@ int main(int argc, char **argv)
 						else
 						{
 							// drop packet
-							dropPacketLog(PRIORITY_QUEUE_FULL, log_filename, recv_packet);
+							dropPacketLog(PRIORITY_QUEUE_FULL, log_stream, recv_packet);
 							delete recv_packet;
 							recv_packet = new L2Packet();
 						}
@@ -394,7 +400,7 @@ int main(int argc, char **argv)
 			if (!packet_found)
 			{
 				// drop packet
-				dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
+				dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_stream, recv_packet);
 				delete recv_packet;
 				recv_packet = new L2Packet();
 			}
@@ -414,9 +420,10 @@ int main(int argc, char **argv)
 					delay_counter.wait();
 
 					// Drop packets randomly
-					if (0 && next_hop.packet->type() != 'R' && next_hop.packet->type() != 'D')
+					if (evaluate_packet_loss(0, 50) && next_hop.packet->type() != 'R' && next_hop.packet->type() != 'D')
 					{
 						//Drop and log
+						dropPacketLog(LOSS_EVENT, log_stream, recv_packet);
 					}
 					else
 					{
