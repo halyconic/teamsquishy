@@ -128,7 +128,7 @@ p2_1: all
 p2_1s: all
 	-cd test/sender && rm sender.txt
 	@echo 'Run sender'
-	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-13 -h 3000 -i 2 -t 100 -d debug >> sender.txt
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-13 -h 3000 -i 2 -t 100 -d debug
 	
 p2_1e: all
 	-cd test/emulator && rm emulator.txt

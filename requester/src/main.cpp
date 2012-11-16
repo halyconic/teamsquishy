@@ -407,7 +407,7 @@ int main(int argc, char **argv)
 			send_packet.src_port() = curr_addr.sin_port;
 			send_packet.dest_ip_addr() = sender_addr.sin_addr.s_addr;
 			send_packet.dest_port() = sender_addr.sin_port;
-			send_packet.l1_length() = L1_HEADER;
+			send_packet.l1_length() = L1_HEADER + strlen(file_option);
 			strcpy(send_packet.payload(), file_option);
 
 			if (debug)
