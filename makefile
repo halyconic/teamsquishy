@@ -123,7 +123,7 @@ p2_1: all
 	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table1.txt -l log01 -d debug >> emulator.txt &
 	sleep 1
 	@echo 'Run requester'
-	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-13 -h 3000 -o hello.txt -w 100 -d debug >> requester.txt &
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-13 -h 3000 -o file.txt -w 100 -d debug >> requester.txt &
 
 p2_1s: all
 	-cd test/sender && rm sender.txt
