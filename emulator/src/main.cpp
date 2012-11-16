@@ -19,6 +19,13 @@
 #include "packet.h"
 #include "counter.h"
 
+enum
+{
+	NO_FORWARDING_ENTRY_FOUND,
+	PRIORITY_QUEUE_FULL,
+	LOSS_EVENT
+};
+
 class Hop
 {
 public:
@@ -35,6 +42,56 @@ public:
 		next_port(n),
 		delay(d) {;}
 };
+
+void dropPacketLog(int reason, char* file_option, L2Packet* p)
+{
+	// file setup
+	std::ofstream myfile;
+	myfile.open (file_option);
+
+	// print out packet properties
+	p->print();
+
+	// print out current time (to millisecond granularity)
+	time_t now;
+	struct tm *tm;
+
+	now = time(0);
+	if ((tm = localtime (&now)) == NULL)
+	{
+		printf ("Error extracting time stuff\n");
+		myfile << "Error extracting time stuff\n";
+	}
+
+	printf ("%04d-%02d-%02d %02d:%02d:%02d\n",
+			tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday,
+			tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+	myfile << tm->tm_year+1900;
+	myfile << tm->tm_mon+1;
+	myfile << tm->tm_mday;
+	myfile << tm->tm_hour;
+	myfile << tm->tm_min;
+	myfile << tm->tm_sec;
+
+	// write reason to log file
+	switch (reason)
+	{
+	case NO_FORWARDING_ENTRY_FOUND:
+		myfile << "No forwarding table entry found";
+		break;
+	case PRIORITY_QUEUE_FULL:
+		myfile << "Priority queue was full";
+		break;
+	case LOSS_EVENT:
+		myfile << "Loss event occurred";
+		break;
+	default:
+		myfile << "Uncaught reason for packet loss";
+	}
+
+	myfile << "\n";
+}
 
 int main(int argc, char **argv)
 {
@@ -287,6 +344,7 @@ int main(int argc, char **argv)
 					{
 						// Print error to logstream
 						// drop packet
+						dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
 						delete recv_packet;
 						recv_packet = new L2Packet();
 					}
@@ -305,6 +363,7 @@ int main(int argc, char **argv)
 						else
 						{
 							// drop packet
+							dropPacketLog(PRIORITY_QUEUE_FULL, log_filename, recv_packet);
 							delete recv_packet;
 							recv_packet = new L2Packet();
 						}
@@ -318,6 +377,7 @@ int main(int argc, char **argv)
 			if (!packet_found)
 			{
 				// drop packet
+				dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
 				delete recv_packet;
 				recv_packet = new L2Packet();
 			}
