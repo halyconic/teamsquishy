@@ -144,7 +144,7 @@ struct L2Packet
 	void print()
 	{
 		printf("L2: %x %o %d %o %d %d\nL1: %c %d %d\n%s\n",
-				priority(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), l1_length(),
+				priority(), src_ip_addr(), ntohs(src_port()), dest_ip_addr(), ntohs(dest_port()), l1_length(),
 				type(), seq(), length(),
 				payload());
 	}
