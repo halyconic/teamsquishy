@@ -154,6 +154,27 @@ p2_2: all
 	@echo 'Run requester'
 	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-14 -h 3000 -o file.txt -w 100 -d debug >> requester.txt &
 
+p2_2s: all
+	-cd test/sender && rm sender.txt
+	@echo 'Run sender'
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 10 -q 1 -l 100 -f mumble-13 -h 5000 -i 2 -t 100 -d debug >> sender.txt
+
+p2_2e1:
+	-cd test/emulator && rm emulator1.txt
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 5000 -q 100 -f table2.txt -l log02 -d debug >> emulator1.txt
+	
+p2_2e2:
+	-cd test/emulator && rm emulator2.txt
+	@echo 'Run emulator'
+	cd test/emulator && ../../emulator/Default/emulator -p 3000 -q 100 -f table2.txt -l log12 -d debug >> emulator2.txt
+
+p2_2r:
+	-cd test/requester && rm requester.txt
+	@echo 'Run requester'
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-13 -h 3000 -o filepart.txt -w 100 -d debug >> requester.txt
+
+
 p2_3:
 	-cd test/sender && rm sender.txt
 	-cd test/requester && rm requester.txt

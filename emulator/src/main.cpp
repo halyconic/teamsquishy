@@ -176,15 +176,51 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Set up socket
+	 * Set up variables
 	 */
 
-	int sock;
+	int sock, curr_sock;
 	int bytes_read; // <- note how this is now on its own line!
 	socklen_t addr_len; // <- and this too, with a different type.
 	int flags = MSG_DONTWAIT;
+	struct sockaddr_in emulator_addr, next_addr, curr_addr;
 
-	struct sockaddr_in emulator_addr, next_addr;
+	/*
+	 * Cache current location
+	 */
+
+	if ((curr_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+    const char* google_dns_ip = "8.8.8.8";
+    uint16_t dns_port = 53;
+    struct sockaddr_in lookup_serv_addr;
+    memset(&lookup_serv_addr, 0, sizeof(lookup_serv_addr));
+    lookup_serv_addr.sin_family = AF_INET;
+    lookup_serv_addr.sin_addr.s_addr = inet_addr(google_dns_ip);
+    lookup_serv_addr.sin_port = htons(dns_port);
+
+    int err = connect(curr_sock, (const sockaddr*) &lookup_serv_addr, sizeof(lookup_serv_addr));
+    // TODO: verify err != -1
+
+    socklen_t namelen = sizeof(curr_addr);
+    err = getsockname(curr_sock, (sockaddr*) &curr_addr, &namelen);
+    // TODO: verify err != -1
+
+    if (debug)
+	{
+		printf("Own address: %s %u\n",
+			   inet_ntoa(curr_addr.sin_addr),
+			   ntohs(curr_addr.sin_port));
+	}
+	close(curr_sock);
+
+	/*
+	 * Set up socket
+	 */
 
 	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 	{
@@ -246,8 +282,11 @@ int main(int argc, char **argv)
 			// check forwarding table
 			for (unsigned int i = 0; i < forward_table.size(); i++)
 			{
+				// Accept packet if matching entry in tracker table exists
 				if (recv_packet->dest_ip_addr() == forward_table[i].dest_ip &&
-					recv_packet->dest_port() == forward_table[i].dest_port)
+					recv_packet->dest_port() == forward_table[i].dest_port &&
+					curr_addr.sin_addr.s_addr == forward_table[i].emu_ip &&
+					emulator_addr.sin_port == forward_table[i].emu_port)
 				{
 					if (debug)
 					{
@@ -304,46 +343,34 @@ int main(int argc, char **argv)
 			bool packet_was_sent = false;
 			for (int i = 0; i < NUM_QUEUES; i++)
 			{
-				printf("gettign to evaluate\n");
-				bool b = evaluate_packet_loss(1, 5);
-				// test for probable loss
-			/*	if (evaluate_packet_loss(0, forward_table[i].loss))
+				if (!queues[i].empty())
 				{
-					// TODO: call dropped packet log
-				}
-				else
-				{*/
-					if (!queues[i].empty())
+					packet_was_sent = true;
+					//next_hop = queues[i].pop();
+					Hop next_hop = queues[i].front();
+
+					// Next address
+					next_addr.sin_family = AF_INET;
+					next_addr.sin_port = next_hop.next_port;
+					next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
+					bzero(&(next_addr.sin_zero), 8);
+
+					if (debug)
 					{
-						packet_was_sent = true;
-						//next_hop = queues[i].pop();
-						Hop next_hop = queues[i].front();
-
-						// Next address
-						next_addr.sin_family = AF_INET;
-						next_addr.sin_port = next_hop.next_port;
-						next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
-						bzero(&(next_addr.sin_zero), 8);
-
-						if (debug)
-						{
-							printf("Packet sent:\n");
-							next_hop.packet->print();
-							printf("Destination: %s %d\n\n",
-								   inet_ntoa(next_addr.sin_addr),
-								   htons(next_addr.sin_port));
-						}
-
-						sendto(sock, next_hop.packet, next_hop.packet->l2_length(), 0,
-								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
-
-						queues[i].pop();
-
-						break;
+						printf("Packet sent:\n");
+						next_hop.packet->print();
+					    printf("Destination: %s %d\n\n",
+							   inet_ntoa(next_addr.sin_addr),
+							   htons(next_addr.sin_port));
 					}
-				//}
 
+					sendto(sock, *next_hop.packet, next_hop.packet->l1_length() + L2_HEADER, 0,
+							(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
 
+					queues[i].pop();
+
+					break;
+				}
 			}
 
 			if (!packet_was_sent)

@@ -271,13 +271,17 @@ int main(int argc, char **argv)
     err = getsockname(curr_sock, (sockaddr*) &curr_addr, &namelen);
     // TODO: verify err != -1
 
+    close(curr_sock);
+
+    // Set current port
+    curr_addr.sin_port = htons(port);
+
     if (debug)
 	{
 		printf("Own address: %s %u\n",
 			   inet_ntoa(curr_addr.sin_addr),
 			   ntohs(curr_addr.sin_port));
 	}
-	close(curr_sock);
 
 	/*
 	 * Set up send
