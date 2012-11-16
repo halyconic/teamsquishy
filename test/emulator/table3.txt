@@ -1,2 +1,2 @@
-mumble-13 3000 mumble-13 4000 mumble-13 4000 10 50
-mumble-13 3000 mumble-13 2000 mumble-13 2000 0 0
+mumble-17.cs.wisc.edu 3000 mumble-17.cs.wisc.edu 4000 mumble-17.cs.wisc.edu 4000 10 50
+mumble-17.cs.wisc.edu 3000 mumble-17.cs.wisc.edu 2000 mumble-17.cs.wisc.edu 2000 0 0
