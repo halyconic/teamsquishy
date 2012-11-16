@@ -33,6 +33,24 @@ public:
 		next_port(n) {;}
 };
 
+bool evaluate_packet_loss(int floor, int ceiling)
+{
+	/*srand((unsigned)time(0));
+	int range = (ceiling - floor);
+	int rnd = floor + int((range * rand()) / (RAND_MAX + 1.0));
+
+	if (rnd <= ceiling)
+	{
+		printf("packet is being lost due to lossy link");
+		return true;
+	}
+	else
+	{
+		return false;
+	}*/
+}
+
+
 int main(int argc, char **argv)
 {
 	/*
@@ -286,34 +304,46 @@ int main(int argc, char **argv)
 			bool packet_was_sent = false;
 			for (int i = 0; i < NUM_QUEUES; i++)
 			{
-				if (!queues[i].empty())
+				printf("gettign to evaluate\n");
+				bool b = evaluate_packet_loss(1, 5);
+				// test for probable loss
+			/*	if (evaluate_packet_loss(0, forward_table[i].loss))
 				{
-					packet_was_sent = true;
-					//next_hop = queues[i].pop();
-					Hop next_hop = queues[i].front();
-
-					// Next address
-					next_addr.sin_family = AF_INET;
-					next_addr.sin_port = next_hop.next_port;
-					next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
-					bzero(&(next_addr.sin_zero), 8);
-
-					if (debug)
-					{
-						printf("Packet sent:\n");
-						next_hop.packet->print();
-					    printf("Destination: %s %d\n\n",
-							   inet_ntoa(next_addr.sin_addr),
-							   htons(next_addr.sin_port));
-					}
-
-					sendto(sock, next_hop.packet, next_hop.packet->l2_length(), 0,
-							(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
-
-					queues[i].pop();
-
-					break;
+					// TODO: call dropped packet log
 				}
+				else
+				{*/
+					if (!queues[i].empty())
+					{
+						packet_was_sent = true;
+						//next_hop = queues[i].pop();
+						Hop next_hop = queues[i].front();
+
+						// Next address
+						next_addr.sin_family = AF_INET;
+						next_addr.sin_port = next_hop.next_port;
+						next_addr.sin_addr.s_addr = next_hop.next_ip_addr;
+						bzero(&(next_addr.sin_zero), 8);
+
+						if (debug)
+						{
+							printf("Packet sent:\n");
+							next_hop.packet->print();
+							printf("Destination: %s %d\n\n",
+								   inet_ntoa(next_addr.sin_addr),
+								   htons(next_addr.sin_port));
+						}
+
+						sendto(sock, next_hop.packet, next_hop.packet->l2_length(), 0,
+								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+
+						queues[i].pop();
+
+						break;
+					}
+				//}
+
+
 			}
 
 			if (!packet_was_sent)
