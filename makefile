@@ -128,7 +128,7 @@ p2_1: all
 p2_1s: all
 	-cd test/sender && rm sender.txt
 	@echo 'Run sender'
-	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-13 -h 3000 -i 2 -t 100 -d debug
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 100 -q 1 -l 100 -f mumble-13 -h 3000 -i 2 -t 100 -d debug >> sender.txt
 	
 p2_1e: all
 	-cd test/emulator && rm emulator.txt
@@ -157,7 +157,7 @@ p2_2: all
 p2_2s: all
 	-cd test/sender && rm sender.txt
 	@echo 'Run sender'
-	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 10 -q 1 -l 100 -f mumble-13 -h 5000 -i 2 -t 100 -d debug
+	cd test/sender && ../../sender/Default/sender -p 2000 -g 4000 -r 10 -q 1 -l 100 -f mumble-13 -h 5000 -i 2 -t 100 -d debug >> sender.txt
 
 p2_2e1:
 	-cd test/emulator && rm emulator1.txt
@@ -172,7 +172,7 @@ p2_2e2:
 p2_2r:
 	-cd test/requester && rm requester.txt
 	@echo 'Run requester'
-	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-13 -h 3000 -o hello.txt -w 100 -d debug >> requester.txt
+	cd test/requester && ../../requester/Default/requester -p 4000 -f mumble-13 -h 3000 -o filepart.txt -w 100 -d debug >> requester.txt
 
 
 p2_3:

@@ -22,6 +22,12 @@ Counter::Counter(double rate)
 	wait_time.tv_usec = 1000000 * 1/rate;
 }
 
+Counter::Counter(unsigned long int timeout)
+{
+	wait_time.tv_usec = 1000 * timeout;
+	gettimeofday(&last_time, NULL);
+}
+
 void Counter::wait()
 {
 	struct timeval curr_time;
@@ -52,7 +58,7 @@ bool Counter::check()
 	time_elapsed.tv_usec = curr_time.tv_usec - last_time.tv_usec;
 
 	// wait (time_to_wait - time_elapsed_millisec)
-	if (wait_time.tv_usec < time_elapsed.tv_usec)
+	if (wait_time.tv_usec > time_elapsed.tv_usec)
 		return false;
 
 	gettimeofday(&last_time, NULL);

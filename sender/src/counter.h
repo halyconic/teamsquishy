@@ -14,6 +14,7 @@ class Counter
 {
 public:
 	Counter(double rate);
+	Counter(long unsigned int microseconds);
 
 	// Wait until last_time + wait_time
 	void wait();

@@ -10,6 +10,7 @@
 #include <stdlib.h> //exit
 #include <stdio.h>
 #include <vector>
+#include <list>
 #include <algorithm>//sort
 #include <istream>
 
@@ -232,13 +233,20 @@ int main(int argc, char **argv)
     err = getsockname(curr_sock, (sockaddr*) &curr_addr, &namelen);
     // TODO: verify err != -1
 
+    close(curr_sock);
+
+    // Set port
+    curr_addr.sin_port = htons(sender_port);
+
     if (debug)
 	{
 		printf("Own address: %s %u\n",
 			   inet_ntoa(curr_addr.sin_addr),
 			   ntohs(curr_addr.sin_port));
 	}
-	close(curr_sock);
+
+
+
 
 	/*
 	 * Set up send
@@ -321,6 +329,8 @@ int main(int argc, char **argv)
 	// Set destination port of requester
 	requester_addr.sin_port = htons(requester_port);
 
+	// Cache port and requester address
+
 	if (recv_packet.type() == 'R')
 	{
 		// Create window
@@ -357,13 +367,7 @@ int main(int argc, char **argv)
 		{
 			send_packets[i] = new L2Packet(length);
 		}
-		std::vector<std::pair<Counter, unsigned int> > timeout_tracker;
-
-		// Reset timeout for initial packets
-		for (unsigned int i = 0; i < timeout_tracker.size(); i++)
-		{
-			timeout_tracker[i].first.reset(timeout);
-		}
+		std::list<std::pair<Counter, unsigned int> > timeout_tracker;
 
 		while (filestr.good())
 		{
@@ -402,10 +406,12 @@ int main(int argc, char **argv)
 
 				// Create entry if data is left to be sent
 				if (send_packet->length() !=0)
-					timeout_tracker.push_back(std::pair<Counter, unsigned int>(Counter(rate), i));
-
+					timeout_tracker.push_back(std::pair<Counter, unsigned int>(Counter(timeout), i));
 				++seq_no;
 			}
+
+			if (debug)
+				printf("Done reading from file.\n");
 
 			// Check for ack packets and send as necessary
 			while (!timeout_tracker.empty())
@@ -413,12 +419,13 @@ int main(int argc, char **argv)
 				fflush(stdout);
 
 				// send batch
-				for (unsigned int i = 0; i < timeout_tracker.size(); i++)
+				for (std::list<std::pair<Counter, unsigned int> >::iterator iter = timeout_tracker.begin();
+						iter != timeout_tracker.end();
+						++iter)
 				{
-					// Resend if timeout expired
-					if (timeout_tracker[i].first.check())
+					if (iter->first.check())
 					{
-						unsigned int key = timeout_tracker[i].second;
+						unsigned int key = iter->second;
 						L2Packet* send_packet = send_packets[key];
 
 						// Send packets
@@ -457,21 +464,22 @@ int main(int argc, char **argv)
 					}
 
 					// Remove matching entry from tracker, ignore irrelevant ack packets
-					for (unsigned int i = 0; i < timeout_tracker.size(); i++)
+					for (std::list<std::pair<Counter, unsigned int> >::iterator iter = timeout_tracker.begin();
+							iter != timeout_tracker.end();
+							++iter)
 					{
-						unsigned int key = timeout_tracker[i].second;
+						unsigned int key = iter->second;
 						L2Packet* send_packet = send_packets[key];
 
 						if (send_packet->seq() == recv_packet.seq())
 						{
 							// Remove element from array
-							timeout_tracker.erase(timeout_tracker.begin() + i);
+							timeout_tracker.erase(iter);
 						}
 
 						// Break to be safe - breaking the iterator
 						break;
 					}
-
 					// Extra ACK packets are ignored
 				}
 			}
@@ -484,8 +492,10 @@ int main(int argc, char **argv)
 		send_packet.priority() = priority;
 		send_packet.src_ip_addr() = curr_addr.sin_addr.s_addr;
 		send_packet.src_port() = curr_addr.sin_port;
-		send_packet.dest_ip_addr() = requester_addr.sin_addr.s_addr;
-		send_packet.dest_port() = requester_addr.sin_port;
+		send_packet.dest_ip_addr() = requester_addr.sin_addr.s_addr; // TODO
+		send_packet.dest_port() = ntohs(requester_port);
+		send_packet.length() = 0;
+		send_packet.l1_length() = L1_HEADER;
 
 		if (debug)
 		{
