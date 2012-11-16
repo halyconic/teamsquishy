@@ -296,10 +296,11 @@ int main(int argc, char **argv)
 					{
 						// Print error to logstream
 						// drop packet
+						dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
+
 						delete recv_packet;
 						recv_packet = new L2Packet();
 
-						dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
 					}
 					else
 					{
@@ -312,10 +313,11 @@ int main(int argc, char **argv)
 						else
 						{
 							// drop packet
+							dropPacketLog(PRIORITY_QUEUE_FULL, log_filename, recv_packet);
+
 							delete recv_packet;
 							recv_packet = new L2Packet();
 
-							dropPacketLog(PRIORITY_QUEUE_FULL, log_filename, recv_packet);
 
 						}
 					}
@@ -328,10 +330,11 @@ int main(int argc, char **argv)
 			if (!packet_found)
 			{
 				// drop packet
+				dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
+
 				delete recv_packet;
 				recv_packet = new L2Packet();
 
-				dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_filename, recv_packet);
 			}
 		}
 		else
