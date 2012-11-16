@@ -93,6 +93,23 @@ void dropPacketLog(int reason, char* file_option, L2Packet* p)
 	myfile << "\n";
 }
 
+bool evaluate_packet_loss(int floor, int ceiling)
+{
+	srand((unsigned)time(0));
+	int range = (ceiling - floor);
+	int rnd = floor + int((range * rand()) / (RAND_MAX + 1.0));
+
+	if (rnd <= ceiling)
+	{
+		printf("packet is being lost due to lossy link");
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	/*
