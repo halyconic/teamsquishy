@@ -30,6 +30,17 @@
 
 const char* domain = ".cs.wisc.edu";
 
+struct Cache : Counter
+{
+	unsigned int seq;
+	unsigned int remaining_attempts;
+
+	Cache(long unsigned int t, unsigned int s, unsigned int r = 5) :
+		Counter(t),
+		seq(s),
+		remaining_attempts(r) {;}
+};
+
 /*
  * TODO:
  *   Comment!
@@ -367,7 +378,7 @@ int main(int argc, char **argv)
 		{
 			send_packets[i] = new L2Packet(length);
 		}
-		std::list<std::pair<Counter, unsigned int> > timeout_tracker;
+		std::list<Cache> timeout_tracker;
 
 		while (filestr.good())
 		{
@@ -406,7 +417,7 @@ int main(int argc, char **argv)
 
 				// Create entry if data is left to be sent
 				if (send_packet->length() !=0)
-					timeout_tracker.push_back(std::pair<Counter, unsigned int>(Counter(timeout), i));
+					timeout_tracker.push_back(Cache(timeout, i));
 				++seq_no;
 			}
 
@@ -419,13 +430,13 @@ int main(int argc, char **argv)
 				fflush(stdout);
 
 				// send batch
-				for (std::list<std::pair<Counter, unsigned int> >::iterator iter = timeout_tracker.begin();
+				for (std::list<Cache>::iterator iter = timeout_tracker.begin();
 						iter != timeout_tracker.end();
 						++iter)
 				{
-					if (iter->first.check())
+					if (iter->check())
 					{
-						unsigned int key = iter->second;
+						unsigned int key = iter->seq;
 						L2Packet* send_packet = send_packets[key];
 
 						// Send packets
@@ -443,6 +454,17 @@ int main(int argc, char **argv)
 								(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
 
 						counter.wait();
+
+						// If no more attempts are left
+						iter->remaining_attempts--;
+						if (iter->remaining_attempts <= 0)
+						{
+							if (debug)
+							{
+								printf("Resend attempts exceeded for packet %d.\n", iter->seq);
+							}
+							timeout_tracker.erase(iter);
+						}
 					}
 				}
 
@@ -464,11 +486,11 @@ int main(int argc, char **argv)
 					}
 
 					// Remove matching entry from tracker, ignore irrelevant ack packets
-					for (std::list<std::pair<Counter, unsigned int> >::iterator iter = timeout_tracker.begin();
+					for (std::list<Cache>::iterator iter = timeout_tracker.begin();
 							iter != timeout_tracker.end();
 							++iter)
 					{
-						unsigned int key = iter->second;
+						unsigned int key = iter->seq;
 						L2Packet* send_packet = send_packets[key];
 
 						if (send_packet->seq() == recv_packet.seq())

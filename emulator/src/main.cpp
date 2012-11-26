@@ -95,22 +95,16 @@ void dropPacketLog(int reason, std::ofstream& log_stream, L2Packet* p)
 	log_stream.flush();
 }
 
-// Returns true if dropped
-bool evaluate_packet_loss(int floor, int ceiling)
+// Returns true if dropped, assumes a percentage is given (0 to 99)
+bool evaluate_packet_loss(unsigned short int chance_of_drop)
 {
-	srand((unsigned)time(0));
-	int range = (ceiling - floor);
-	int rnd = floor + int((range * rand()) / (RAND_MAX + 1.0));
+	// Value from 0 to 99
+	unsigned short int result = rand() % 100;
 
-	if (rnd <= ceiling)
-	{
-		//printf("packet is being lost due to lossy link");
-		return true;
-	}
-	else
-	{
+	if (chance_of_drop < result)
 		return false;
-	}
+	else
+		return true;
 }
 
 int main(int argc, char **argv)
@@ -366,7 +360,7 @@ int main(int argc, char **argv)
 
 					unsigned char priority = recv_packet->priority();
 
-					if (priority > 2 || priority == 0)
+					if (priority > 3 || priority < 1)
 					{
 						// Print error to logstream
 						// drop packet
@@ -424,10 +418,10 @@ int main(int argc, char **argv)
 					delay_counter.wait();
 
 					// Drop packets randomly
-					if (evaluate_packet_loss(0, next_hop.loss) && next_hop.packet->type() != 'R' && next_hop.packet->type() != 'D')
+					if (next_hop.packet->type() != 'R' && next_hop.packet->type() != 'E' && evaluate_packet_loss(next_hop.loss))
 					{
 						//Drop and log
-						dropPacketLog(LOSS_EVENT, log_stream, recv_packet);
+						dropPacketLog(LOSS_EVENT, log_stream, next_hop.packet);
 					}
 					else
 					{

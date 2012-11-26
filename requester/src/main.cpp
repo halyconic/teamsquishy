@@ -480,7 +480,7 @@ int main(int argc, char **argv)
 		{
 			if (debug)
 			{
-				recv_packet->print();
+				//recv_packet->print();
 				printTime();
 				printf("Destination: %s %u\n",
 					   inet_ntoa(sender_addr.sin_addr),
