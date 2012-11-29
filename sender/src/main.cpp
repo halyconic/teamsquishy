@@ -3,6 +3,9 @@
  *
  *  Created on: Oct 6, 2012
  *      Author: stephen
+ *
+ *  Known bugs:
+ *  	Window size must be greater than seq_no (which should be one)
  */
 
 #include <unistd.h> //getopt
@@ -218,6 +221,7 @@ int main(int argc, char **argv)
 	socklen_t addr_len; // <- and this too, with a different type.
 	struct sockaddr_in requester_addr, sender_addr, emu_addr, curr_addr;
 	struct hostent *emu_ent;
+	unsigned int last_seq_no;
 
 	/*
 	 * Cache current location
@@ -255,9 +259,6 @@ int main(int argc, char **argv)
 			   inet_ntoa(curr_addr.sin_addr),
 			   ntohs(curr_addr.sin_port));
 	}
-
-
-
 
 	/*
 	 * Set up send
@@ -380,21 +381,21 @@ int main(int argc, char **argv)
 		}
 		std::list<Cache> timeout_tracker;
 
+		// Setup seq_no
+		last_seq_no = seq_no;
+
 		while (filestr.good())
 		{
 			// Cache batch of packets to send
 			for (unsigned int i = 0; i < window_size && filestr.good(); i++)
 			{
-				if (debug)
-					printf("Beginning to read from file.\n");
-
 				L2Packet* send_packet = send_packets[i];
 
 				send_packet->clear();
 
 				// establish values for sender's L2 packet
 				send_packet->type() = 'D';
-				send_packet->seq() = seq_no;
+				send_packet->seq() = last_seq_no;
 				send_packet->priority() = priority;
 				send_packet->src_ip_addr() = curr_addr.sin_addr.s_addr;
 				send_packet->src_port() = curr_addr.sin_port;
@@ -408,7 +409,7 @@ int main(int argc, char **argv)
 				if (debug)
 				{
 					printf("Packet cached:\n");
-					send_packet->print();
+					send_packet->print_short();
 					printf("Index: %d\n", i);
 					printf("Destination: %s %u\n\n",
 						   inet_ntoa(requester_addr.sin_addr),
@@ -418,11 +419,15 @@ int main(int argc, char **argv)
 				// Create entry if data is left to be sent
 				if (send_packet->length() !=0)
 					timeout_tracker.push_back(Cache(timeout, i));
-				++seq_no;
+
+				++last_seq_no;
 			}
 
 			if (debug)
+			{
 				printf("Done reading from file.\n");
+				printf("last_seq_no: %d\n\n", last_seq_no);
+			}
 
 			// Check for ack packets and send as necessary
 			while (!timeout_tracker.empty())
@@ -436,6 +441,7 @@ int main(int argc, char **argv)
 				{
 					if (iter->check())
 					{
+						// Get key to send_packet array
 						unsigned int key = iter->seq;
 						L2Packet* send_packet = send_packets[key];
 
@@ -443,17 +449,19 @@ int main(int argc, char **argv)
 						if (debug)
 						{
 							printf("Packet being sent:\n");
-							send_packet->print();
+							send_packet->print_short();
 							printf("Index: %d\n", key);
 							printf("Destination: %s %u\n\n",
 								   inet_ntoa(requester_addr.sin_addr),
 								   ntohs(requester_addr.sin_port));
 						}
 
+						fflush(stdout);
+
 						sendto(sock, *send_packet, send_packet->l2_length(), 0,
 								(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
 
-						counter.wait();
+						//counter.wait();
 
 						// If no more attempts are left
 						iter->remaining_attempts--;
@@ -464,6 +472,7 @@ int main(int argc, char **argv)
 								printf("Resend attempts exceeded for packet %d.\n", iter->seq);
 							}
 							timeout_tracker.erase(iter);
+							break; // HACK, avoid iter issues
 						}
 					}
 				}
@@ -478,7 +487,7 @@ int main(int argc, char **argv)
 					if (debug)
 					{
 						printf("Packet being received:\n");
-						recv_packet.print();
+						recv_packet.print_short();
 						printf("Bytes read: %d\n", bytes_read);
 						printf("Origin: %s %u\n\n",
 							   inet_ntoa(requester_addr.sin_addr),
@@ -490,19 +499,32 @@ int main(int argc, char **argv)
 							iter != timeout_tracker.end();
 							++iter)
 					{
+						// Get key to send_packet array
 						unsigned int key = iter->seq;
 						L2Packet* send_packet = send_packets[key];
 
 						if (send_packet->seq() == recv_packet.seq())
 						{
-							// Remove element from array
-							timeout_tracker.erase(iter);
-						}
+							//printf("iter DEL: %d\n", iter->seq);
 
-						// Break to be safe - breaking the iterator
-						break;
+							timeout_tracker.erase(iter);
+
+							// Break to be safe - breaking the iterator
+							break;
+						}
 					}
 					// Extra ACK packets are ignored
+				}
+			}
+
+			if (debug)
+			{
+				printf("Packet window complete.\n");
+				for (std::list<Cache>::iterator iter = timeout_tracker.begin();
+						iter != timeout_tracker.end();
+						++iter)
+				{
+					printf("iter left_over: %d\n\n", iter->seq);
 				}
 			}
 		}
@@ -510,7 +532,7 @@ int main(int argc, char **argv)
 
 		L2Packet send_packet(0);
 		send_packet.type() = 'E';
-		send_packet.seq() = seq_no;
+		send_packet.seq() = last_seq_no;
 		send_packet.priority() = priority;
 		send_packet.src_ip_addr() = curr_addr.sin_addr.s_addr;
 		send_packet.src_port() = curr_addr.sin_port;
@@ -522,7 +544,7 @@ int main(int argc, char **argv)
 		if (debug)
 		{
 			printf("End packet being sent:\n");
-			send_packet.print();
+			send_packet.print_short();
 		}
 
 		sendto(sock, send_packet, L1_HEADER + L2_HEADER, 0,

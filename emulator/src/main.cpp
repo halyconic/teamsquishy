@@ -24,7 +24,8 @@ enum
 {
 	NO_FORWARDING_ENTRY_FOUND,
 	PRIORITY_QUEUE_FULL,
-	LOSS_EVENT
+	LOSS_EVENT,
+	INVALID_PRIORITY
 };
 
 class Hop
@@ -86,6 +87,9 @@ void dropPacketLog(int reason, std::ofstream& log_stream, L2Packet* p)
 		break;
 	case LOSS_EVENT:
 		log_stream << "Loss event occurred";
+		break;
+	case INVALID_PRIORITY:
+		log_stream << "Packet with invalid priority dropped";
 		break;
 	default:
 		log_stream << "Uncaught reason for packet loss";
@@ -332,7 +336,7 @@ int main(int argc, char **argv)
 			if (debug)
 			{
 				printf("Packet received:\n");
-				recv_packet->print();
+				recv_packet->print_short();
 				printf("Bytes read: %d\n", bytes_read);
 			    printf("Origin: %s %d\n\n",
 					   inet_ntoa(next_addr.sin_addr),
@@ -364,7 +368,7 @@ int main(int argc, char **argv)
 					{
 						// Print error to logstream
 						// drop packet
-						dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_stream, recv_packet);
+						dropPacketLog(INVALID_PRIORITY, log_stream, recv_packet);
 						delete recv_packet;
 						recv_packet = new L2Packet();
 					}
@@ -436,7 +440,7 @@ int main(int argc, char **argv)
 						if (debug)
 						{
 							printf("Packet sent:\n");
-							next_hop.packet->print();
+							next_hop.packet->print_short();
 							printf("Destination: %s %d\n\n",
 								   inet_ntoa(next_addr.sin_addr),
 								   htons(next_addr.sin_port));

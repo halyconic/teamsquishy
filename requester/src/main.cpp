@@ -473,7 +473,7 @@ int main(int argc, char **argv)
 		if (debug)
 		{
 			printf("Packet received:\n");
-			recv_packet->print();
+			recv_packet->print_short();
 		}
 
 		if (recv_packet->type() == 'D')
@@ -516,7 +516,7 @@ int main(int argc, char **argv)
 		{
 			if (debug)
 			{
-				recv_packet->print();
+				recv_packet->print_short();
 				printTime();
 				printf("Destination: %s %u\n",
 					   inet_ntoa(sender_addr.sin_addr),
@@ -533,7 +533,7 @@ int main(int argc, char **argv)
 			if (debug)
 			{
 				printf("Unexpected packet received:\n");
-				recv_packet->print();
+				recv_packet->print_short();
 				printf("Destination: %s %u\n",
 					   inet_ntoa(sender_addr.sin_addr),
 					   ntohs(sender_addr.sin_port));
