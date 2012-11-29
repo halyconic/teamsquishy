@@ -374,7 +374,7 @@ int main(int argc, char **argv)
 					}
 					else
 					{
-						if (queues[priority-1].size() < queue_size)
+						if (queues[priority-1].size() < queue_size || recv_packet->type() == 'E')
 						{
 							// add packet
 							queues[priority-1].push(Hop(
@@ -402,6 +402,11 @@ int main(int argc, char **argv)
 			if (!packet_found)
 			{
 				// drop packet
+				if (debug)
+				{
+					printf("forward entry issue\n");
+					recv_packet->print_short();
+				}
 				dropPacketLog(NO_FORWARDING_ENTRY_FOUND, log_stream, recv_packet);
 				delete recv_packet;
 				recv_packet = new L2Packet();

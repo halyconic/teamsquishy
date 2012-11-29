@@ -432,8 +432,6 @@ int main(int argc, char **argv)
 			// Check for ack packets and send as necessary
 			while (!timeout_tracker.empty())
 			{
-				fflush(stdout);
-
 				// send batch
 				for (std::list<Cache>::iterator iter = timeout_tracker.begin();
 						iter != timeout_tracker.end();
@@ -456,20 +454,16 @@ int main(int argc, char **argv)
 								   ntohs(requester_addr.sin_port));
 						}
 
-						fflush(stdout);
-
 						sendto(sock, *send_packet, send_packet->l2_length(), 0,
 								(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
-
-						//counter.wait();
 
 						// If no more attempts are left
 						iter->remaining_attempts--;
 						if (iter->remaining_attempts <= 0)
 						{
-							if (debug)
+							if (1 || debug)
 							{
-								printf("Resend attempts exceeded for packet %d.\n", iter->seq);
+								printf("Resend attempts exceeded for packet %d.\n", send_packet->seq());
 							}
 							timeout_tracker.erase(iter);
 							break; // HACK, avoid iter issues
@@ -479,7 +473,7 @@ int main(int argc, char **argv)
 
 				// ack receive
 				bytes_read = recvfrom(sock, recv_packet, recv_packet.l2_length(), MSG_DONTWAIT,
-					(struct sockaddr *) &requester_addr, &addr_len);
+					(struct sockaddr *) &emu_addr, &addr_len);
 
 				// If ack packet was received
 				if (bytes_read > 0 && recv_packet.type() == 'A')

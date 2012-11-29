@@ -24,6 +24,7 @@ Counter::Counter(double rate)
 
 Counter::Counter(unsigned long int timeout)
 {
+	wait_time.tv_sec = 0;
 	wait_time.tv_usec = 1000 * timeout;
 	gettimeofday(&last_time, NULL);
 }
