@@ -52,6 +52,7 @@ void Counter::reset(unsigned int timeout)
 	gettimeofday(&last_time, NULL);
 }
 
+// Return true if ready;
 bool Counter::check()
 {
 	struct timeval curr_time;
