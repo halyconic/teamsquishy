@@ -38,7 +38,7 @@ struct Cache : Counter
 	unsigned int seq;
 	unsigned int remaining_attempts;
 
-	Cache(long unsigned int t, unsigned int s, unsigned int r = 5) :
+	Cache(long unsigned int t, unsigned int s, unsigned int r = 10) :
 		Counter(t),
 		seq(s),
 		remaining_attempts(r) {;}
@@ -222,6 +222,8 @@ int main(int argc, char **argv)
 	struct sockaddr_in requester_addr, sender_addr, emu_addr, curr_addr;
 	struct hostent *emu_ent;
 	unsigned int last_seq_no;
+	unsigned int sent = 0;
+	unsigned int cached = 0;
 
 	/*
 	 * Cache current location
@@ -416,6 +418,8 @@ int main(int argc, char **argv)
 						   ntohs(requester_addr.sin_port));
 				}
 
+				cached++;
+
 				// Create entry if data is left to be sent
 				if (send_packet->length() !=0)
 					timeout_tracker.push_back(Cache(timeout, i));
@@ -453,6 +457,8 @@ int main(int argc, char **argv)
 								   inet_ntoa(requester_addr.sin_addr),
 								   ntohs(requester_addr.sin_port));
 						}
+
+						sent++;
 
 						sendto(sock, *send_packet, send_packet->l2_length(), 0,
 								(struct sockaddr *) &emu_addr, sizeof(struct sockaddr));
@@ -548,4 +554,7 @@ int main(int argc, char **argv)
 	{
 		// Drop packet
 	}
+
+	printf("\nSUMMARY\n\n");
+	printf("Loss rate %f", (sent - cached) / (float)(sent));
 }
