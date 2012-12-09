@@ -5,7 +5,7 @@
  *      Author: swebber
  */
 
-#include "utils.h"
+#include "topology.h"
 
 void readtopology(char* filename, bool debug)
 {
