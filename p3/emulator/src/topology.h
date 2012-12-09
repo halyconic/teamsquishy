@@ -16,6 +16,6 @@ struct TopologyEntry
 	std::vector<std::pair<unsigned long int, unsigned short int> > pair;
 };
 
-void readtopology(char* filename, bool debug);
+std::vector<TopologyEntry> readtopology(char* filename, bool debug);
 
 #endif /* TOPOLOGY_H_ */
