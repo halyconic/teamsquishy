@@ -10,6 +10,8 @@
 #include <stdlib.h> //exit
 #include <stdio.h>
 #include <string.h> //strdup
+#include <arpa/inet.h>
+#include <netdb.h>
 
 #include "packet.h"
 #include "topology.h"
@@ -88,7 +90,7 @@ int main(int argc, char **argv)
 	 * Build forwarding table
 	 */
 
-	// readtopology();
+	std::vector<TopologyEntry> topology = readtopology(filename, debug);
 
 	/*
 	 * Setup variables
