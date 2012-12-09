@@ -12,7 +12,7 @@
 #include <string.h> //strdup
 
 #include "packet.h"
-#include "utils.h"
+#include "topology.h"
 
 int main(int argc, char **argv)
 {
@@ -139,6 +139,5 @@ int main(int argc, char **argv)
 		 */
 		bytes_read = recvfrom(sock, *recv_packet, HEADER_LENGTH, flags,
 						(struct sockaddr *) &recv_addr, &addr_len);
-
 	}
 }
