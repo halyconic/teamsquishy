@@ -18,5 +18,6 @@ struct TopologyEntry
 
 void readtopology(char* filename, bool debug);
 
+void createroutes(bool debug);
 
 #endif /* TOPOLOGY_H_ */

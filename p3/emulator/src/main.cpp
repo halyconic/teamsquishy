@@ -13,8 +13,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include "counter.h"
 #include "packet.h"
-#include "topology.h"
 
 int main(int argc, char **argv)
 {
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 	 */
 
 	//std::vector<TopologyEntry> topology = readtopology(filename, debug);
-	readtopology(filename, debug);
+	//readtopology(filename, debug);
 
 	/*
 	 * Setup variables
@@ -126,22 +126,22 @@ int main(int argc, char **argv)
 	 * Listen for incoming packets
 	 */
 
-	/*printf("Emulator polling on port %d\n", port);
+	printf("Emulator polling on port %d\n", port);
 	fflush(stdout);
 	Packet *recv_packet;
 
 	while(1)
 	{
-
-		 * Create routes
-
+		/*
+		 * Explore every 4 seconds
+		 */
 
 		// createroutes();
 
-
+		/*
 		 * Listen
-
+		 */
 		bytes_read = recvfrom(sock, *recv_packet, HEADER_LENGTH, flags,
 						(struct sockaddr *) &recv_addr, &addr_len);
-	}*/
+	}
 }
