@@ -133,8 +133,10 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	printf("%s\n%d\n%x\n", src_ent->h_addr, src_ent->h_addr, src_ent->h_addr);
-	//Address source = Address(src_ent->h_addr, source_port);
+	//printf("%s\n%d\n%x\n", src_ent->h_addr, src_ent->h_addr, src_ent->h_addr);
+
+	// Keep in host order and setup source and destination
+	//Address source = Address(src_ent->h_addr, htons(source_port));
 	//Address destination = Address(dest_ent->h_addr, destination_port);
 
 	/*

@@ -10,6 +10,7 @@
 
 #include <utility>
 
+// These are in network order.
 typedef std::pair<unsigned long int, unsigned short int> Address;
 
 #endif /* UTILS_H_ */

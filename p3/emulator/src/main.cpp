@@ -134,9 +134,9 @@ int main(int argc, char **argv)
 
 	printf("Emulator polling on port %d\n", port);
 	fflush(stdout);
-	Packet *recv_packet;
+	Packet recv_packet;
 
-	while(1)
+	while (0)
 	{
 		/*
 		 * Explore every 4 seconds
@@ -147,7 +147,25 @@ int main(int argc, char **argv)
 		/*
 		 * Listen
 		 */
-		bytes_read = recvfrom(sock, *recv_packet, HEADER_LENGTH, flags,
+
+		bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH, flags,
 						(struct sockaddr *) &recv_addr, &addr_len);
+
+		// Packet recieved
+		if (bytes_read >= 0)
+		{
+			if (recv_packet.TTL()-- <= 0)
+			{
+				// Drop packet
+				recv_packet.clear();
+
+				if (debug && recv_packet.TTL() < 0)
+					printf("Error! Should never get here.");
+			}
+			else
+			{
+				// Handle packet
+			}
+		}
 	}
 }
