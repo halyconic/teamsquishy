@@ -44,6 +44,30 @@ struct Packet
 	char& operator [] (unsigned i)       { return this->values_[i]; }
 	operator char*()                     { return this->values_; }
 
+	void set_source(Address source)
+	{
+		src_ip_addr() = source.first;
+		src_port() = source.second;
+	}
+
+	Address get_source()
+	{
+		Address source = Address(src_ip_addr(), src_port());
+		return source;
+	}
+
+	void set_destination(Address destination)
+	{
+		dest_ip_addr() = destination.first;
+		dest_port() = destination.second;
+	}
+
+	Address get_destination()
+	{
+		Address destination = Address(dest_ip_addr(), dest_port());
+		return destination;
+	}
+
 	void print()
 	{
 		//
