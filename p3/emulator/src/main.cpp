@@ -91,7 +91,8 @@ int main(int argc, char **argv)
 	 * Build forwarding table
 	 */
 
-	std::vector<TopologyEntry> topology = readtopology(filename, debug);
+	//std::vector<TopologyEntry> topology = readtopology(filename, debug);
+	readtopology(filename, debug);
 
 	/*
 	 * Setup variables
