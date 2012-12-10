@@ -16,7 +16,7 @@
 #include "utils.h"
 #include "packet.h"
 
-const int MAXRESEND = 100;
+const int MAX_RESEND = 128;
 
 int main(int argc, char **argv)
 {
@@ -203,8 +203,10 @@ int main(int argc, char **argv)
 	/*
 	 * Loop
 	 */
+	printf("Routetrace probing form port %d\n\n", trace_port);
+	fflush(stdout);
 
-	for (unsigned int i = 0; i < 100; i++)
+	for (unsigned int i = 0; i < MAX_RESEND; i++)
 	{
 		/*
 		 * Send

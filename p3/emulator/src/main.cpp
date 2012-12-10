@@ -16,6 +16,8 @@
 #include "counter.h"
 #include "packet.h"
 
+const int START_TTL = 128;
+
 int main(int argc, char **argv)
 {
 	/*
@@ -129,10 +131,17 @@ int main(int argc, char **argv)
 	addr_len = sizeof(struct sockaddr);
 
 	/*
+	 * Save own address
+	 */
+
+	// Network order
+	Address emulator_address = Address(emulator_addr.sin_addr.s_addr, htons(port));
+
+	/*
 	 * Listen for incoming packets
 	 */
 
-	printf("Emulator polling on port %d\n", port);
+	printf("Emulator polling on port %d\n\n", port);
 	fflush(stdout);
 	Packet recv_packet;
 
@@ -151,7 +160,7 @@ int main(int argc, char **argv)
 		bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH, flags,
 						(struct sockaddr *) &recv_addr, &addr_len);
 
-		// Packet recieved
+		// Packet received
 		if (bytes_read >= 0)
 		{
 			if (recv_packet.TTL()-- <= 0)
@@ -167,7 +176,13 @@ int main(int argc, char **argv)
 			}
 			else
 			{
-				// Handle packet
+				recv_packet.TTL()--;
+
+				if (recv_packet.type() == 'T')
+				{
+					recv_packet.set_source(emulator_address);
+					// Send to next shortest path
+				}
 			}
 		}
 	}

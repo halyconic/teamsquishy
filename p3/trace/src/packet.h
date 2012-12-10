@@ -70,7 +70,7 @@ struct Packet
 
 	void print()
 	{
-		//
+		// TODO Kevin: for debugging!
 	}
 
 	void clear()
