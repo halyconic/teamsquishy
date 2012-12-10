@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 	 */
 
 	//std::vector<TopologyEntry> topology = readtopology(filename, debug);
-	readtopology(filename, debug);
+	//readtopology(filename, debug);
 
 	/*
 	 * Setup variables
