@@ -15,7 +15,6 @@
 
 #include "counter.h"
 #include "packet.h"
-#include "topology.h"
 
 int main(int argc, char **argv)
 {
