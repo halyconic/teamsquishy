@@ -50,7 +50,7 @@ e5:
 t_1-4:
 	-cd test/trace && rm trace.txt
 	@echo 'Run routetrace 1-4'
-	cd test/emulator && ../../emulator/Default/emulator -a 5000 -b $(host) -c 5001 -d $(host) -e 5004 -f 1 >> parse.txt &
+	cd test/trace && ../../trace/Default/trace -a 5000 -b $(host) -c 5001 -d $(host) -e 5004 -f 1 >> trace.txt &
 
 analyze:
 	gedit test/emulator/emulator1.txt &

@@ -10,6 +10,13 @@
 #include <stdlib.h> //exit
 #include <stdio.h>
 #include <string.h> //strdup
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include "utils.h"
+#include "packet.h"
+
+const int MAX_RESEND = 128;
 
 int main(int argc, char **argv)
 {
@@ -100,5 +107,138 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	/*
+	 * Setup variables
+	 */
 
+	int recv_sock, send_sock;
+	int bytes_read;
+	int flags = MSG_DONTWAIT;
+	socklen_t addr_len;
+	struct sockaddr_in trace_addr, send_addr, recv_addr;
+	struct hostent *src_ent, *dest_ent;
+
+	/*
+	 * Resolve network lookups
+	 */
+
+	src_ent = (struct hostent *) gethostbyname(source_hostname);
+	if ((struct hostent *) src_ent == NULL)
+	{
+		printf("Host was not found by the name of %s\n", source_hostname);
+		exit(1);
+	}
+
+	dest_ent = (struct hostent *) gethostbyname(destination_hostname);
+	if ((struct hostent *) dest_ent == NULL)
+	{
+		printf("Host was not found by the name of %s\n", destination_hostname);
+		exit(1);
+	}
+
+	Address source = Address((*((struct in_addr *)src_ent->h_addr)).s_addr, htons(source_port));
+	Address destination = Address((*((struct in_addr *)dest_ent->h_addr)).s_addr, htons(destination_port));
+
+	if (debug)
+	{
+		printf("Source address: %s %lu at %d\n", inet_ntoa(*((struct in_addr *)src_ent->h_addr)), source.first, source.second);
+		printf("Destination address: %s %lu at %d\n", inet_ntoa(*((struct in_addr *)src_ent->h_addr)), destination.first, destination.second);
+	}
+
+	/*
+	 * Setup socket
+	 */
+
+	// Setup port to listen on
+	if ((recv_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+	// Own address
+	trace_addr.sin_family = AF_INET;
+	trace_addr.sin_port = htons(trace_port);
+	trace_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	bzero(&(trace_addr.sin_zero), 8);
+
+	// Bind port to listen on
+	if (bind(recv_sock, (struct sockaddr *) &trace_addr, sizeof(struct sockaddr)) == -1)
+	{
+		perror("Bind");
+		exit(1);
+	}
+
+	addr_len = sizeof(struct sockaddr);
+
+	/*
+	 * Set up send
+	 */
+
+	// Setup port to send on
+	if ((send_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+	// Where we are sending to
+	send_addr.sin_family = AF_INET;
+	send_addr.sin_port = htons(source_port);
+	send_addr.sin_addr = *((struct in_addr *)src_ent->h_addr);
+	bzero(&(send_addr.sin_zero), 8);
+
+	/*
+	 * Setup packets
+	 */
+
+	Packet send_packet;
+	send_packet.type() = 'T';
+	send_packet.TTL() = 0;
+	send_packet.set_source(source);
+	send_packet.set_destination(destination);
+
+	Packet recv_packet;
+
+	/*
+	 * Loop
+	 */
+	printf("Routetrace probing form port %d\n\n", trace_port);
+	fflush(stdout);
+
+	for (unsigned int i = 0; i < MAX_RESEND; i++)
+	{
+		/*
+		 * Send
+		 */
+
+		sendto(send_sock, send_packet, HEADER_LENGTH, 0,
+				(struct sockaddr *) &send_addr, sizeof(struct sockaddr));
+
+		/*
+		 * Listen
+		 */
+
+		bytes_read = recvfrom(recv_sock, recv_packet, HEADER_LENGTH, 0,
+			(struct sockaddr *) &recv_addr, &addr_len);
+
+		if (debug && bytes_read <= 0)
+		{
+			printf("Error! Should never get here.");
+			exit(1);
+		}
+
+		// TODO Kevin: print out IP and port
+
+		if (recv_packet.get_source() == destination)
+			break;
+
+		send_packet.TTL()++;
+	}
+
+	/*
+	 * Analyze
+	 */
+
+	// TODO Kevin: print out final statistics
 }
