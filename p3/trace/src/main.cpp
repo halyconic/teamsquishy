@@ -133,11 +133,14 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	//printf("%s\n%d\n%x\n", src_ent->h_addr, src_ent->h_addr, src_ent->h_addr);
+	Address source = Address((*((struct in_addr *)src_ent->h_addr)).s_addr, htons(source_port));
+	Address destination = Address((*((struct in_addr *)dest_ent->h_addr)).s_addr, htons(destination_port));
 
-	// Keep in host order and setup source and destination
-	//Address source = Address(src_ent->h_addr, htons(source_port));
-	//Address destination = Address(dest_ent->h_addr, destination_port);
+	if (debug)
+	{
+		printf("Source address: %s %lu at %d\n", inet_ntoa(*((struct in_addr *)src_ent->h_addr)), source.first, source.second);
+		printf("Destination address: %s %lu at %d\n", inet_ntoa(*((struct in_addr *)src_ent->h_addr)), destination.first, destination.second);
+	}
 
 	/*
 	 * Setup socket
@@ -167,6 +170,8 @@ int main(int argc, char **argv)
 	/*
 	 * Send
 	 */
+
+
 
 	/*
 	 * Listen
