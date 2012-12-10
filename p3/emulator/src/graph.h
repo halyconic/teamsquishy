@@ -15,20 +15,38 @@
 
 #include "utils.h"
 
-typedef std::pair<int, int> Edge;
+// Each edge is composed of two uniquely identifying addresses
+typedef std::pair<Address, Address> Edge;
+
+// Create graph with list structure with identical inbound and outbound links
+typedef boost::adjacency_list<boost::listS, boost::listS, boost::undirectedS> Graph;
 
 class GraphManager
 {
-	//typedef boost::adjacency_list<vecS, vecS, bidirectionalS> Graph;
-
 private:
-	//Graph graph;
+	Graph graph;
 
 public:
-	// Returns the next hop given a destination
-	Address forward_packet(Address destination);
+	/*
+	 * Returns the next hop given a destination
+	 */
+	Address get_next_hop(Address destination, bool debug);
 
-	// Creates a network given a topology file
+	/*
+	 * Given an adjacent node, return all other nodes this node is connected to
+	 *
+	 * Returns an empty vector is the source node is not connected
+	 */
+	std::vector<Address> get_other_hops(Address source, bool debug);
+
+	/*
+	 * Print network statistics
+	 */
+	void print_network_info(bool debug);
+
+	/*
+	 * Creates a network graph given a topology file
+	 */
 	GraphManager(char* filename);
 };
 
