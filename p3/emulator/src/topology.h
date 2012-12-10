@@ -11,9 +11,11 @@
 #include <vector>
 #include <utility>
 
+#include "utils.h"
+
 struct TopologyEntry
 {
-	std::vector<std::pair<unsigned long int, unsigned short int> > pair;
+	std::vector<Address> pair;
 };
 
 void readtopology(char* filename, bool debug);

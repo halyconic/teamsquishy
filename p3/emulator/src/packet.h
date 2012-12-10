@@ -8,6 +8,8 @@
 #ifndef PACKET_H_
 #define PACKET_H_
 
+#include "utils.h"
+
 const int HEADER_LENGTH = 29;
 
 struct Packet
