@@ -15,7 +15,7 @@
 
 struct TopologyEntry
 {
-	std::vector<Address> pair;
+	std::vector<Address> entry_vector;
 };
 
 void readtopology(char* filename, bool debug);

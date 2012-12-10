@@ -8,9 +8,11 @@
 #include "graph.h"
 #include "topology.h"
 
-GraphManager::GraphManager(char* filename)
+GraphManager::GraphManager(char* filename, bool debug)
 {
 	/*
 	 * Iterate across entries
 	 */
+
+	readtopology(filename, debug);
 }

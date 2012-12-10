@@ -15,6 +15,7 @@
 
 #include "counter.h"
 #include "packet.h"
+#include "graph.h"
 
 int main(int argc, char **argv)
 {
@@ -92,6 +93,8 @@ int main(int argc, char **argv)
 
 	//std::vector<TopologyEntry> topology = readtopology(filename, debug);
 	//readtopology(filename, debug);
+	printf("about to do Graphmanager\n");
+	GraphManager *graph_m = new GraphManager(filename, debug);
 
 	/*
 	 * Setup variables

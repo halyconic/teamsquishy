@@ -29,7 +29,7 @@ public:
 	Address forward_packet(Address destination);
 
 	// Creates a network given a topology file
-	GraphManager(char* filename);
+	GraphManager(char* filename, bool debug);
 };
 
 #endif /* GRAPH_H_ */
