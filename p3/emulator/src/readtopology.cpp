@@ -25,7 +25,7 @@ void readtopology(char* filename, bool debug)
 	printf("getting into readtopolgy\n");
 
 
-	/*std::ifstream fin;
+	std::ifstream fin;
 	fin.open(filename);
 	if (!fin.good())
 	{
@@ -41,8 +41,10 @@ void readtopology(char* filename, bool debug)
 	if (debug)
 		printf("Input entries:\n");
 
-
+	/*
 	fin.getline(buffer, MAX_CHARS_PER_LINE);
+
+
 
 	// array to store memory addresses of the tokens in buf
 	char* token_array[MAX_TOKENS_PER_LINE] = {0}; // initialize to 0
@@ -50,11 +52,16 @@ void readtopology(char* filename, bool debug)
 	printf("%s\n", token_array[0]);
 	token_array[1] = strtok(buffer, DELIMITER);
 	printf("%s\n", token_array[1]);
+	printf("%s\n", strtok(token_array[0], ","));
+	printf("%s\n", strtok(0, ","));*/
+
 
 	while (!fin.eof())
 	{
 
 		fin.getline(buffer, MAX_CHARS_PER_LINE);
+		std::vector <std::pair <char*, char*> > pair_list;
+		std::pair <char*, char*> pair;
 
 		// array to store memory addresses of the tokens in buf
 		char* token[MAX_TOKENS_PER_LINE] = {0}; // initialize to 0
@@ -75,7 +82,7 @@ void readtopology(char* filename, bool debug)
 			}
 
 			// Print file as inputting
-			if (0 && debug)
+			if (debug)
 			{
 				for (int i = 0; i < MAX_TOKENS_PER_LINE; i++)
 				{
@@ -85,20 +92,28 @@ void readtopology(char* filename, bool debug)
 				printf("\n");
 			}
 
-			//printf("the first token: %s\n", token[0]);
+			// parse tokens and store into pairs list
+			for (int i = 0; i < MAX_TOKENS_PER_LINE; i++)
+			{
+				pair.first = strtok(token[i], ",");
+				pair.second = strtok(0, ",");
+				printf("%s -- %s,", pair.first, pair.second);
+				printf(" ");
+			}
+
+			printf("\n");
+
+			/*	//printf("the first token: %s\n", token[0]);
 			topologyEntries.push_back(TrackerEntry(
 					strdup(token[0]),
 					strtoul(token[1], NULL, 0),
 					strdup(token[2]),
-					strtoul(token[3], NULL, 0)));
-			topologyEntries.push_back(TrackerEntry(
-								strdup(token[0]),
-								strtoul(token[1], NULL, 0),
-								strdup(token[2]),
-								strtoul(token[3], NULL, 0)));
+					strtoul(token[3], NULL, 0)))*/;
+			TopologyEntry entry;
+			//topologyEntries.push_back(entry(token));
 		}
 	}
-		// parse the line into tokens, stor into token
+	/*	// parse the line into tokens, stor into token
 	for (int i = 0; 2; i ++)
 	{
 		// store the current token
@@ -109,9 +124,9 @@ void readtopology(char* filename, bool debug)
 
 		printf("hi\n");
 
-	}
+	}*/
 
-*/
+
 
 
 }

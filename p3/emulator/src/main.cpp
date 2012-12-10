@@ -126,22 +126,22 @@ int main(int argc, char **argv)
 	 * Listen for incoming packets
 	 */
 
-	printf("Emulator polling on port %d\n", port);
+	/*printf("Emulator polling on port %d\n", port);
 	fflush(stdout);
 	Packet *recv_packet;
 
 	while(1)
 	{
-		/*
+
 		 * Create routes
-		 */
+
 
 		// createroutes();
 
-		/*
+
 		 * Listen
-		 */
+
 		bytes_read = recvfrom(sock, *recv_packet, HEADER_LENGTH, flags,
 						(struct sockaddr *) &recv_addr, &addr_len);
-	}
+	}*/
 }
