@@ -10,6 +10,10 @@
 #include <stdlib.h> //exit
 #include <stdio.h>
 #include <string.h> //strdup
+#include <arpa/inet.h>
+#include <netdb.h>
+
+#include "utils.h"
 
 int main(int argc, char **argv)
 {
@@ -100,5 +104,73 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	/*
+	 * Setup variables
+	 */
 
+	int sock;
+	int bytes_read;
+	int flags = MSG_DONTWAIT;
+	socklen_t addr_len;
+	struct sockaddr_in trace_addr, recv_addr;
+	struct hostent *src_ent, *dest_ent;
+
+	/*
+	 * Resolve network lookups
+	 */
+
+	src_ent = (struct hostent *) gethostbyname(source_hostname);
+	if ((struct hostent *) src_ent == NULL)
+	{
+		printf("Host was not found by the name of %s\n", source_hostname);
+		exit(1);
+	}
+
+	dest_ent = (struct hostent *) gethostbyname(destination_hostname);
+	if ((struct hostent *) dest_ent == NULL)
+	{
+		printf("Host was not found by the name of %s\n", destination_hostname);
+		exit(1);
+	}
+
+	printf("%s\n%d\n%x\n", src_ent->h_addr, src_ent->h_addr, src_ent->h_addr);
+	//Address source = Address(src_ent->h_addr, source_port);
+	//Address destination = Address(dest_ent->h_addr, destination_port);
+
+	/*
+	 * Setup socket
+	 */
+
+	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+	// Own address
+	trace_addr.sin_family = AF_INET;
+	trace_addr.sin_port = htons(trace_port);
+	trace_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	bzero(&(trace_addr.sin_zero), 8);
+
+	// Bind port to listen on
+	if (bind(sock, (struct sockaddr *) &trace_addr, sizeof(struct sockaddr)) == -1)
+	{
+		perror("Bind");
+		exit(1);
+	}
+
+	addr_len = sizeof(struct sockaddr);
+
+	/*
+	 * Send
+	 */
+
+	/*
+	 * Listen
+	 */
+
+	/*
+	 * Analyze
+	 */
 }

@@ -107,6 +107,12 @@ int main(int argc, char **argv)
 	 * Setup socket
 	 */
 
+	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
 	// Own address
 	emulator_addr.sin_family = AF_INET;
 	emulator_addr.sin_port = htons(port);
