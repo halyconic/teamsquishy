@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 	 * Listen for incoming packets
 	 */
 
-	printf("Emulator polling on port %ld\n", port);
+	printf("Emulator polling on port %d\n", port);
 	fflush(stdout);
 
 	while(1)
