@@ -66,4 +66,9 @@ private:
 	char* values_;
 };
 
+struct RoutePacket : Packet
+{
+
+};
+
 #endif /* PACKET_H_ */

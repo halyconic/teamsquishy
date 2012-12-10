@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include "counter.h"
 #include "packet.h"
 #include "topology.h"
 
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		/*
-		 * Create routes
+		 * Explore every 4 seconds
 		 */
 
 		// createroutes();
