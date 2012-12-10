@@ -127,6 +127,7 @@ int main(int argc, char **argv)
 
 	printf("Emulator polling on port %d\n", port);
 	fflush(stdout);
+	Packet *recv_packet;
 
 	while(1)
 	{
