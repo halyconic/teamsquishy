@@ -160,7 +160,10 @@ int main(int argc, char **argv)
 				recv_packet.clear();
 
 				if (debug && recv_packet.TTL() < 0)
+				{
 					printf("Error! Should never get here.");
+					exit(1);
+				}
 			}
 			else
 			{

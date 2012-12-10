@@ -14,6 +14,9 @@
 #include <netdb.h>
 
 #include "utils.h"
+#include "packet.h"
+
+const int MAXRESEND = 100;
 
 int main(int argc, char **argv)
 {
@@ -108,11 +111,11 @@ int main(int argc, char **argv)
 	 * Setup variables
 	 */
 
-	int sock;
+	int recv_sock, send_sock;
 	int bytes_read;
 	int flags = MSG_DONTWAIT;
 	socklen_t addr_len;
-	struct sockaddr_in trace_addr, recv_addr;
+	struct sockaddr_in trace_addr, send_addr, recv_addr;
 	struct hostent *src_ent, *dest_ent;
 
 	/*
@@ -146,7 +149,8 @@ int main(int argc, char **argv)
 	 * Setup socket
 	 */
 
-	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	// Setup port to listen on
+	if ((recv_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
 	{
 		perror("Socket");
 		exit(1);
@@ -159,7 +163,7 @@ int main(int argc, char **argv)
 	bzero(&(trace_addr.sin_zero), 8);
 
 	// Bind port to listen on
-	if (bind(sock, (struct sockaddr *) &trace_addr, sizeof(struct sockaddr)) == -1)
+	if (bind(recv_sock, (struct sockaddr *) &trace_addr, sizeof(struct sockaddr)) == -1)
 	{
 		perror("Bind");
 		exit(1);
@@ -168,16 +172,71 @@ int main(int argc, char **argv)
 	addr_len = sizeof(struct sockaddr);
 
 	/*
-	 * Send
+	 * Set up send
 	 */
 
+	// Setup port to send on
+	if ((send_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
 
+	// Where we are sending to
+	send_addr.sin_family = AF_INET;
+	send_addr.sin_port = htons(source_port);
+	send_addr.sin_addr = *((struct in_addr *)src_ent->h_addr);
+	bzero(&(send_addr.sin_zero), 8);
 
 	/*
-	 * Listen
+	 * Setup packets
 	 */
+
+	Packet send_packet;
+	send_packet.type() = 'T';
+	send_packet.TTL() = 0;
+	send_packet.set_source(source);
+	send_packet.set_destination(destination);
+
+	Packet recv_packet;
+
+	/*
+	 * Loop
+	 */
+
+	for (unsigned int i = 0; i < 100; i++)
+	{
+		/*
+		 * Send
+		 */
+
+		sendto(send_sock, send_packet, HEADER_LENGTH, 0,
+				(struct sockaddr *) &send_addr, sizeof(struct sockaddr));
+
+		/*
+		 * Listen
+		 */
+
+		bytes_read = recvfrom(recv_sock, recv_packet, HEADER_LENGTH, 0,
+			(struct sockaddr *) &recv_addr, &addr_len);
+
+		if (debug && bytes_read <= 0)
+		{
+			printf("Error! Should never get here.");
+			exit(1);
+		}
+
+		// TODO Kevin: print out IP and port
+
+		if (recv_packet.get_source() == destination)
+			break;
+
+		send_packet.TTL()++;
+	}
 
 	/*
 	 * Analyze
 	 */
+
+	// TODO Kevin: print out final statistics
 }
