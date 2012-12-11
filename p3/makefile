@@ -26,6 +26,7 @@ e1:
 	-cd test/emulator && rm emulator1.txt
 	@echo 'Run emulator 1'
 	cd test/emulator && ../../emulator/Default/emulator -p 5001 -f topology.txt -d >> emulator1.txt &
+	make analyze
 
 e2:
 	-cd test/emulator && rm emulator2.txt
