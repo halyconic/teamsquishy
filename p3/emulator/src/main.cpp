@@ -93,7 +93,8 @@ int main(int argc, char **argv)
 	 * Build forwarding table
 	 */
 
-	GraphManager(filename, debug);
+	GraphManager graph_manager = GraphManager(filename, debug);
+	graph_manager.print_network_info(debug);
 
 	/*
 	 * Setup variables
