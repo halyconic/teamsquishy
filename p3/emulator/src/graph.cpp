@@ -24,31 +24,31 @@ GraphManager::GraphManager(char* filename, bool debug)
 	std::vector<TopologyEntry> entries = readtopology(filename, debug);
 
 	std::vector<Edge> edge_list = std::vector<Edge>();
-//	for (unsigned int i = 0; i < entries.size(); i++)
-//	{
-//		TopologyEntry entry = entries[i];
-//		Address source = entries[i].entry_vector[0];
-//
-//		for (unsigned int j = 1; j < entries.size(); i++)
-//		{
+	for (unsigned int i = 0; i < entries.size(); i++)
+	{
+		TopologyEntry entry = entries[i];
+		Address source = entries[i].entry_vector[0];
+
+		for (unsigned int j = 1; j < entries[i].entry_vector.size(); j++)
+		{
 //			Address destination = entry.entry_vector[j];
 //
 //			// Add to graph (worried about pointers here for std::pair)
 //			edge_list.push_back(Edge(source, destination));
-//		}
-//	}
+		}
+	}
 
 	// Print all edges
-//	if (debug)
-//	{
-//		printf("Edge list:\n");
-//		for (std::vector<Edge>::iterator i = edge_list.begin(); i != edge_list.end(); ++i)
-//		{
-//			printf("%lu,%d ", i->first.first, i->first.second);
-//			printf("%lu,%d\n", i->second.first, i->second.second);
-//		}
-//		printf("\n");
-//	}
+	if (debug)
+	{
+		printf("Edge list:\n");
+		for (std::vector<Edge>::iterator i = edge_list.begin(); i != edge_list.end(); ++i)
+		{
+			printf("%lu,%d ", i->first.first, i->first.second);
+			printf("%lu,%d\n", i->second.first, i->second.second);
+		}
+		printf("\n");
+	}
 
 	/*
 	 * Create graph using edge list
