@@ -93,8 +93,6 @@ int main(int argc, char **argv)
 	 * Build forwarding table
 	 */
 
-	//std::vector<TopologyEntry> topology = readtopology(filename, debug);
-	//readtopology(filename, debug);
 	printf("about to do Graphmanager\n");
 	GraphManager *graph_m = new GraphManager(filename, debug);
 
