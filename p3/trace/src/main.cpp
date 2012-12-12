@@ -229,6 +229,11 @@ int main(int argc, char **argv)
 		}
 
 		// TODO Kevin: print out IP and port
+		if (debug)
+		{
+			printf("received packet:\n");
+			recv_packet.print();
+		}
 
 		if (recv_packet.get_source() == destination)
 			break;
