@@ -71,7 +71,7 @@ struct Packet
 	void print()
 	{
 		// TODO Kevin: for debugging!
-		");
+
 		printf("source: %lu, %d dest: %lu, %d\n", src_ip_addr(), src_port(), dest_ip_addr(), dest_port());
 	}
 
