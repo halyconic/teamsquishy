@@ -19,7 +19,12 @@
 typedef std::pair<Address, Address> Edge;
 
 // Create graph with list structure with identical inbound and outbound links
-typedef boost::adjacency_list<boost::listS, boost::listS, boost::undirectedS> Graph;
+typedef boost::adjacency_list<
+		boost::listS,
+		boost::listS,
+		boost::undirectedS,
+		boost::property<boost::vertex_index_t, std::size_t>
+		> Graph;
 
 class GraphManager
 {
@@ -47,7 +52,7 @@ public:
 	/*
 	 * Creates a network graph given a topology file
 	 */
-	GraphManager(char* filename);
+	GraphManager(char* filename, bool debug);
 };
 
 #endif /* GRAPH_H_ */

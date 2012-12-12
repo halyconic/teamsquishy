@@ -15,6 +15,7 @@
 
 #include "counter.h"
 #include "packet.h"
+#include "graph.h"
 
 const int START_TTL = 128;
 
