@@ -83,8 +83,10 @@ std::vector<TopologyEntry> readtopology(char* filename, bool debug)
 			}
 		}
 
-		for (int j = 0; j < MAX_TOKENS_PER_LINE; j++){
-			if (token[j] != NULL){
+		for (int j = 0; j < MAX_TOKENS_PER_LINE; j++)
+		{
+			if (token[j] != NULL)
+			{
 				char* temp_ip = strtok(token[j], ",");
 				char* temp_port = strtok(0, ",");
 
@@ -105,12 +107,14 @@ std::vector<TopologyEntry> readtopology(char* filename, bool debug)
 	{
 		// PRINT OUT ENTIRE DATABASE
 		printf("ENTIRE TOPOLOGY TABLE\n");
-		for (unsigned int i = 0; i < topology_entries.size(); i ++){
+		for (unsigned int i = 0; i < topology_entries.size(); i ++)
+		{
 			// get the current entry
 			TopologyEntry entry = topology_entries.at(i);
 
 			// for each address in the current entry
-			for (unsigned int j = 0; j < entry.entry_vector.size(); j++){
+			for (unsigned int j = 0; j < entry.entry_vector.size(); j++)
+			{
 				Address addr = entry.entry_vector.at(j);
 				printf("%lu,%d ", addr.first, addr.second);
 			}

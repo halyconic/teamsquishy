@@ -161,6 +161,12 @@ int main(int argc, char **argv)
 		bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH, flags,
 						(struct sockaddr *) &recv_addr, &addr_len);
 
+		if (debug)
+		{
+			printf("received packet:\n");
+			recv_packet.print();
+		}
+
 		// Packet received
 		if (bytes_read >= 0)
 		{
