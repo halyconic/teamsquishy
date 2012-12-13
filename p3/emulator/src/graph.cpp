@@ -73,8 +73,12 @@ GraphManager::GraphManager(char* filename, bool debug)
 		{
 			Address destination = entry.entry_vector[j];
 
+			/*if (destination.first == 0)
+				printf("something is null :(\n");*/
+
+
 			// Add to graph (worried about pointers here for std::pair)
-			edge_list.push_back(Edge(source, destination));
+			edge_list.push_back(Edge(true_copy_address(entries[i].entry_vector[0]), true_copy_address(entry.entry_vector[j])));
 		}
 	}
 
