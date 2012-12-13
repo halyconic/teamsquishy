@@ -13,14 +13,12 @@
 
 #include "utils.h"
 
-
-
 struct TopologyEntry
 {
 	std::vector<Address> entry_vector;
 };
 
-void readtopology(char* filename, bool debug);
+std::vector<TopologyEntry> readtopology(char* filename, bool debug);
 
 void createroutes(bool debug);
 
