@@ -73,35 +73,40 @@ GraphManager::GraphManager(char* filename, bool debug)
 		{
 			Address destination = entry.entry_vector[j];
 
-			/*if (destination.first == 0)
-				printf("something is null :(\n");*/
-
-
-			// Add to graph (worried about pointers here for std::pair)
-
-			if (debug)
+			if (0 && debug)
 				printf("pushing back a new edge to the edge list correctly!\n");
+
 			edge_list.push_back(Edge(true_copy_address(entries[i].entry_vector[0]), true_copy_address(entry.entry_vector[j])));
 		}
 	}
 
 	// Print all edges
-//	if (debug)
-//	{
-//		printf("Edge list:\n");
-//		for (std::vector<Edge>::iterator i = edge_list.begin(); i != edge_list.end(); ++i)
-//		{
-//			printf("%lu,%d ", i->first.first, i->first.second);
-//			printf("%lu,%d\n", i->second.first, i->second.second);
-//		}
-//		printf("\n");
-//	}
+	if (debug)
+	{
+		printf("Edge list:\n");
+		for (std::vector<Edge>::iterator i = edge_list.begin(); i != edge_list.end(); ++i)
+		{
+			printf("%lu,%d ", i->first.first, i->first.second);
+			printf("%lu,%d\n", i->second.first, i->second.second);
+		}
+		printf("\n");
+	}
 
 	/*
 	 * Create graph using edge list
 	 */
 
-//	graph = Graph(edge_list.begin(), edge_list.end(), entries.size());
+//	graph_t g(edge_array, edge_array + num_arcs, weights, num_nodes);
+
+//	std::vector<Edge>::iterator edge_list_begin = edge_list.begin();
+//	std::vector<Edge>::iterator edge_list_end = edge_list.end();
+
+//	graph = Graph(edge_list.begin, edge_list.end, entries.size());
+
+//	typedef std::pair<int, int> Temp;
+//	std::vector<Temp> temp_list;
+//
+	Graph graph(edge_list.begin(), edge_list.end(), edge_list.size());
 }
 
 Address GraphManager::get_next_hop(Address destination, bool debug)
