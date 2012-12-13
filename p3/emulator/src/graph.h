@@ -32,6 +32,13 @@ private:
 	Graph graph;
 
 public:
+
+	/*
+	 * Recursively copy
+	 */
+	Address true_copy_address(Address addr);
+	Edge true_copy_edge(Edge edge);
+
 	/*
 	 * Returns the next hop given a destination
 	 */

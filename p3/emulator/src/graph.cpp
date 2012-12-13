@@ -24,19 +24,19 @@ GraphManager::GraphManager(char* filename, bool debug)
 	std::vector<TopologyEntry> entries = readtopology(filename, debug);
 
 	std::vector<Edge> edge_list = std::vector<Edge>();
-//	for (unsigned int i = 0; i < entries.size(); i++)
-//	{
-//		TopologyEntry entry = entries[i];
-//		Address source = entries[i].entry_vector[0];
-//
-//		for (unsigned int j = 1; j < entries.size(); i++)
-//		{
-//			Address destination = entry.entry_vector[j];
-//
-//			// Add to graph (worried about pointers here for std::pair)
-//			edge_list.push_back(Edge(source, destination));
-//		}
-//	}
+	for (unsigned int i = 0; i < entries.size(); i++)
+	{
+		TopologyEntry entry = entries[i];
+		Address source = entries[i].entry_vector[0];
+
+		for (unsigned int j = 1; j < entries[i].entry_vector.size(); j++)
+		{
+			Address destination = entry.entry_vector[j];
+
+			// Add to graph (worried about pointers here for std::pair)
+			edge_list.push_back(Edge(source, destination));
+		}
+	}
 
 	// Print all edges
 //	if (debug)

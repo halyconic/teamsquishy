@@ -22,32 +22,32 @@ clean:
 	-cd test/emulator && rm emulator.txt
 	-cd test/trace && rm trace.txt
 	
-e1:
+e1: emulator
 	-cd test/emulator && rm emulator1.txt
 	@echo 'Run emulator 1'
 	cd test/emulator && ../../emulator/Default/emulator -p 5001 -f topology.txt -d >> emulator1.txt
 
-e2:
+e2: emulator
 	-cd test/emulator && rm emulator2.txt
 	@echo 'Run emulator 2'
 	cd test/emulator && ../../emulator/Default/emulator -p 5002 -f topology.txt -d >> emulator2.txt
 
-e3:
+e3: emulator
 	-cd test/emulator && rm emulator3.txt
 	@echo 'Run emulator 3'
 	cd test/emulator && ../../emulator/Default/emulator -p 5003 -f topology.txt -d >> emulator3.txt
 
-e4:
+e4: emulator
 	-cd test/emulator && rm emulator4.txt
 	@echo 'Run emulator 4'
 	cd test/emulator && ../../emulator/Default/emulator -p 5004 -f topology.txt -d >> emulator4.txt
 
-e5:
+e5: emulator
 	-cd test/emulator && rm emulator5.txt
 	@echo 'Run emulator 5'
 	cd test/emulator && ../../emulator/Default/emulator -p 5005 -f topology.txt -d >> emulator5.txt
 
-t_1-4:
+t_1-4: trace
 	-cd test/trace && rm trace.txt
 	@echo 'Run routetrace 1-4'
 	cd test/trace && ../../trace/Default/trace -a 5000 -b $(host) -c 5001 -d $(host) -e 5004 -f 1 >> trace.txt
