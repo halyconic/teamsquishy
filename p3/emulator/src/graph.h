@@ -30,14 +30,16 @@ class GraphManager
 {
 private:
 	Graph graph;
+	Address addr;
+	Edge edge;
 
 public:
 
 	/*
 	 * Recursively copy
 	 */
-	Address true_copy_address(Address addr);
-	Edge true_copy_edge(Edge edge);
+	Address true_copy_address(const Address &a);
+	Edge true_copy_edge(const Edge &e);
 
 	/*
 	 * Returns the next hop given a destination

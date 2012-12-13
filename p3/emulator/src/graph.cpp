@@ -13,6 +13,46 @@
 #include "graph.h"
 #include "topology.h"
 
+ Address GraphManager::true_copy_address(const Address &a)
+{
+	// make a new Address
+	std::pair <unsigned long int,unsigned short int> p;
+	addr = p;
+
+	addr.first = a.first;
+	addr.second = a.second;
+
+	return addr;
+}
+
+ Edge GraphManager::true_copy_edge(const Edge &e)
+{
+	std::pair<unsigned long int, unsigned short int> source_pair;
+	std::pair<unsigned long int, unsigned short int> dest_pair;
+
+	Address source_addr = source_pair;
+	Address dest_addr = dest_pair;
+
+	// copy over the address components for source and destination
+	source_addr.first = e.first.first;
+	source_addr.second = e.first.second;
+
+	dest_addr.first = e.second.first;
+	dest_addr.second = e.second.second;
+
+	// copy over the components of each Address into a new pair (Edge)
+	std::pair<Address, Address> tempEdge;
+	tempEdge.first = source_addr;
+	tempEdge.second = dest_addr;
+
+	edge = tempEdge;
+
+	return edge;
+
+
+
+}
+
 GraphManager::GraphManager(char* filename, bool debug)
 {
 	/*
