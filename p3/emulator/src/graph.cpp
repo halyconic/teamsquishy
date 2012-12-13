@@ -78,6 +78,9 @@ GraphManager::GraphManager(char* filename, bool debug)
 
 
 			// Add to graph (worried about pointers here for std::pair)
+
+			if (debug)
+				printf("pushing back a new edge to the edge list correctly!\n");
 			edge_list.push_back(Edge(true_copy_address(entries[i].entry_vector[0]), true_copy_address(entry.entry_vector[j])));
 		}
 	}
