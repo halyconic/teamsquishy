@@ -6,7 +6,6 @@
  */
 
 #include <stdio.h>
-#include <boost/graph/graph_traits.hpp>
 #include <boost/property_map/property_map.hpp>
 #include <boost/config.hpp>
 #include <arpa/inet.h>
@@ -151,13 +150,13 @@ GraphManager::GraphManager(char* filename, bool debug)
 	// Create edge list and vertex map
 	create_topology(filename, debug);
 
-	std::vector<Edge>::iterator edge_list_begin = edge_list.begin();
-	std::vector<Edge>::iterator edge_list_end = edge_list.end();
+//	std::vector<Edge>::iterator edge_list_begin = edge_list.begin();
+//	std::vector<Edge>::iterator edge_list_end = edge_list.end();
 
 	// Construct graph inefficiently
-	graph(vertex_map.size());
-	for (int i = 0; i < num_edges; ++i)
-	      add_edge(edge_array[i].first, edge_array[i].second, graph);
+	graph = Graph(vertex_map.size());
+	for (unsigned int i = 0; i < edge_list.size(); ++i)
+	      boost::add_edge(edge_list[i].first, edge_list[i].second, graph);
 
 
 //	std::vector<Edge> edge_list = std::vector<Edge>();
