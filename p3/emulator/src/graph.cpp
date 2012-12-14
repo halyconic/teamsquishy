@@ -148,13 +148,17 @@ void GraphManager::create_topology(char* filename, bool debug)
 
 GraphManager::GraphManager(char* filename, bool debug)
 {
-	/*
-	 * Create edge list
-	 *
-	 * Inefficient, but conceptually easier to understand
-	 */
-
+	// Create edge list and vertex map
 	create_topology(filename, debug);
+
+	std::vector<Edge>::iterator edge_list_begin = edge_list.begin();
+	std::vector<Edge>::iterator edge_list_end = edge_list.end();
+
+	// Construct graph inefficiently
+	graph(vertex_map.size());
+	for (int i = 0; i < num_edges; ++i)
+	      add_edge(edge_array[i].first, edge_array[i].second, graph);
+
 
 //	std::vector<Edge> edge_list = std::vector<Edge>();
 //	for (unsigned int i = 0; i < entries.size(); i++)
