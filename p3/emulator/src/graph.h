@@ -10,13 +10,16 @@
 #ifndef GRAPH_H_
 #define GRAPH_H_
 
+#include <map>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 
 #include "utils.h"
 
 // Each edge is composed of two uniquely identifying addresses
-typedef std::pair<Address, Address> Edge;
+//typedef std::pair<Address, Address> Edge;
+typedef std::pair<int, int> Edge;
+typedef std::pair<int,Address> Vertex;
 
 // Create graph with list structure with identical inbound and outbound links
 typedef boost::adjacency_list<
@@ -30,16 +33,16 @@ class GraphManager
 {
 private:
 	Graph graph;
-	Address addr;
-	Edge edge;
+	std::map<int,Address> vertex_map;
+	std::vector<Edge> edge_list;
+
+	// Parse file into map and edge list
+	void create_topology(char* filename, bool debug);
+
+	// Reverse lookup address, returns -1 if not found
+	int get_key_from_address(unsigned long int ip_addr, unsigned short int port);
 
 public:
-
-	/*
-	 * Recursively copy
-	 */
-	Address true_copy_address(const Address &a);
-	Edge true_copy_edge(const Edge &e);
 
 	/*
 	 * Returns the next hop given a destination
