@@ -143,74 +143,31 @@ void GraphManager::create_topology(char* filename, bool debug)
 		}
 		printf("\n");
 	}
+
+	// decrement extra increment and account for line starting at 1
+	num_vertices = line - 2;
 }
 
-GraphManager::GraphManager(char* filename, bool debug)
+GraphManager::GraphManager(char* filename, unsigned long int ip_addr, unsigned short int port, bool debug)
 {
 	// Create edge list and vertex map
 	create_topology(filename, debug);
 
-//	std::vector<Edge>::iterator edge_list_begin = edge_list.begin();
-//	std::vector<Edge>::iterator edge_list_end = edge_list.end();
-
-	// Construct graph inefficiently
-	graph = Graph(vertex_map.size());
-	for (unsigned int i = 0; i < edge_list.size(); ++i)
-	      boost::add_edge(edge_list[i].first, edge_list[i].second, graph);
-
-
-//	std::vector<Edge> edge_list = std::vector<Edge>();
-//	for (unsigned int i = 0; i < entries.size(); i++)
+	// Identify itself in network, else quit
+	vertex = get_key_from_address(ip_addr, port);
+//	if (vertex < 0)
 //	{
-//		TopologyEntry entry = entries[i];
-//		Address source = entries[i].entry_vector[0];
-//
-//		// Insert into edge list
-//		for (unsigned int j = 1; j < entries[i].entry_vector.size(); j++)
-//		{
-//			Address destination = entry.entry_vector[j];
-//
-//			if (0 && debug)
-//				printf("pushing back a new edge to the edge list correctly!\n");
-//
-//			edge_list.push_back(Edge(true_copy_address(entries[i].entry_vector[0]), true_copy_address(entry.entry_vector[j])));
-//		}
+//		printf("Local address does not match node in topology file\n");
+//		exit(1);
 //	}
-//
-//	// Print all edges
-//	if (debug)
-//	{
-//		printf("Edge list:\n");
-//		for (std::vector<Edge>::iterator i = edge_list.begin(); i != edge_list.end(); ++i)
-//		{
-//			printf("%lu,%d ", i->first.first, i->first.second);
-//			printf("%lu,%d\n", i->second.first, i->second.second);
-//		}
-//		printf("\n");
-//	}
-
-	/*
-	 * Create graph using edge list
-	 */
-
-//	graph_t g(edge_array, edge_array + num_arcs, weights, num_nodes);
-
-//	std::vector<Edge>::iterator edge_list_begin = edge_list.begin();
-//	std::vector<Edge>::iterator edge_list_end = edge_list.end();
-
-//	graph = Graph(edge_list.begin, edge_list.end, entries.size());
-
-//	typedef std::pair<int, int> Temp;
-//	std::vector<Temp> temp_list;
-//
-//	Graph graph(edge_list.begin(), edge_list.end(), edge_list.size());
+	vertex = 1;
 
     // declare a graph object
-//    Graph g(num_vertices);
-//
-//    // add the edges to the graph object
-//    for (int i = 0; i < num_edges; ++i)
-//      add_edge(edge_array[i].first, edge_array[i].second, g);
+    graph = Graph(num_vertices);
+
+    // add the edges to the graph object
+    for (unsigned int i = 0; i < edge_list.size(); ++i)
+    	boost::add_edge(edge_list[i].first, edge_list[i].second, graph);
 }
 
 Address GraphManager::get_next_hop(Address destination, bool debug)
@@ -233,17 +190,17 @@ void GraphManager::print_network_info(bool debug)
 
 	printf("All vertices:\n");
 
-//    // get the property map for vertex indices
-//	typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
-//    IndexMap index_map = boost::get(boost::vertex_index, graph);
-//
-//	typedef boost::graph_traits<Graph>::vertex_iterator vertex_iter;
-//	std::pair<vertex_iter, vertex_iter> vp;
-//	for (vp = boost::vertices(graph); vp.first != vp.second; ++vp.first)
-//	{
-//		// Print each vertex
-//		printf("%lu\n", index_map[*vp.first]);
-//	}
+    // get the property map for vertex indices
+	typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
+    IndexMap index_map = boost::get(boost::vertex_index, graph);
+
+	typedef boost::graph_traits<Graph>::vertex_iterator vertex_iter;
+	std::pair<vertex_iter, vertex_iter> vp;
+	for (vp = boost::vertices(graph); vp.first != vp.second; ++vp.first)
+	{
+		// Print each vertex
+		printf("%lu\n", index_map[*vp.first]);
+	}
 
 	printf("\n");
 
@@ -253,17 +210,14 @@ void GraphManager::print_network_info(bool debug)
 
 	printf("All edges:\n");
 
-    // get the property map for vertex indices
-//	typedef boost::property_map<Graph, boost::vertex_index_t>::type IndexMap;
-//    IndexMap index_map = boost::get(boost::vertex_index, graph);
-//
-//	typedef boost::graph_traits<Graph>::edge_iterator edge_iter;
-//	std::pair<edge_iter, edge_iter> ep;
-//	for (ep = boost::vertices(graph); ep.first != ep.second; ++vp.first)
-//	{
-//		// Print each vertex
-//		printf("(%lu, %lu)\n", index_map[source(*ei, g)]);
-//	}
+    using namespace boost;
+    graph_traits<Graph>::edge_iterator ei, ei_end;
+    for (tie(ei, ei_end) = edges(graph); ei != ei_end; ++ei)
+    {
+    	printf("(%d, %d)\n",
+    			index_map[source(*ei, graph)],
+       			index_map[target(*ei, graph)]);
+    }
 
 	printf("\n");
 
@@ -273,13 +227,12 @@ void GraphManager::print_network_info(bool debug)
 
 	printf("Adjacent nodes:\n");
 
-//	graph.
-//
-//	for (vp = boost::vertices(graph); vp.first != vp.second; ++vp.first)
-//	{
-//		// Print each vertex
-//		printf("%lu\n", index_map[*vp.first]);
-//	}
+	graph_traits<Graph>::adjacency_iterator ai, ai_end;
+	for (tie(ai, ai_end) = adjacent_vertices(vertex, graph); ai != ai_end; ++ai)
+	{
+    	printf("%d\n",
+    			index_map[*ai]);
+	}
 
 	printf("\n");
 }

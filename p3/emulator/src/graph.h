@@ -22,16 +22,13 @@ typedef std::pair<int, int> Edge;
 typedef std::pair<int,Address> Vertex;
 
 // Create graph with list structure with identical inbound and outbound links
-typedef boost::adjacency_list<
-		boost::listS,
-		boost::listS,
-		boost::undirectedS,
-		boost::property<boost::vertex_index_t, std::size_t>
-		> Graph;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Graph;
 
 class GraphManager
 {
 private:
+	int num_vertices;
+	int vertex; // Key to vertex_map with your address
 	Graph graph;
 	std::map<int,Address> vertex_map;
 	std::vector<Edge> edge_list;
@@ -64,7 +61,7 @@ public:
 	/*
 	 * Creates a network graph given a topology file
 	 */
-	GraphManager(char* filename, bool debug);
+	GraphManager(char* filename, unsigned long int ip_addr, unsigned short int port, bool debug);
 };
 
 #endif /* GRAPH_H_ */
