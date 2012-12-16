@@ -172,14 +172,39 @@ GraphManager::GraphManager(char* filename, unsigned long int ip_addr, unsigned s
 
 Address GraphManager::get_next_hop(Address destination, bool debug)
 {
-//	// Return empty Address
-//	return Address(0, 0);
+	Address hop = Address(0, 0);
+
+	// Set hop here!
+
+	return hop;
 }
 
 std::vector<Address> GraphManager::get_other_hops(Address source, bool debug)
 {
-//	// Return empty vector
-//	return std::vector<Address>();
+	std::vector<Address> hops;
+
+	if (debug)
+		printf("Getting hops:");
+
+	using namespace boost;
+	typedef property_map<Graph, vertex_index_t>::type IndexMap;
+    IndexMap index_map = get(vertex_index, graph);
+	graph_traits<Graph>::adjacency_iterator ai, ai_end;
+	for (tie(ai, ai_end) = adjacent_vertices(vertex, graph); ai != ai_end; ++ai)
+	{
+		int key = index_map[*ai];
+
+		if (debug)
+			printf(" %d", key);
+
+		hops.push_back(vertex_map[key]);
+	}
+
+	if (debug)
+		printf("\n");
+
+	// Could have memory issues if vertex_map is deleted while being used
+	return hops;
 }
 
 void GraphManager::print_network_info(bool debug)
@@ -214,7 +239,7 @@ void GraphManager::print_network_info(bool debug)
     graph_traits<Graph>::edge_iterator ei, ei_end;
     for (tie(ei, ei_end) = edges(graph); ei != ei_end; ++ei)
     {
-    	printf("(%d, %d)\n",
+    	printf("(%ld, %ld)\n",
     			index_map[source(*ei, graph)],
        			index_map[target(*ei, graph)]);
     }
@@ -230,7 +255,7 @@ void GraphManager::print_network_info(bool debug)
 	graph_traits<Graph>::adjacency_iterator ai, ai_end;
 	for (tie(ai, ai_end) = adjacent_vertices(vertex, graph); ai != ai_end; ++ai)
 	{
-    	printf("%d\n",
+    	printf("%ld\n",
     			index_map[*ai]);
 	}
 
