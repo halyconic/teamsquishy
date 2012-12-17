@@ -11,6 +11,7 @@
 #include "utils.h"
 
 const int HEADER_LENGTH = 29;
+const int ROUTE_LENGTH = 21*4;
 
 struct Packet
 {
@@ -71,17 +72,17 @@ struct Packet
 	void print()
 	{
 		// TODO Kevin: for debugging!
-		printf("source: %lu, %d dest: %lu, %d\n", src_ip_addr(), src_port(), dest_ip_addr(), dest_port());
+		printf("type: %c, source: %lu, %d dest: %lu, %d, TTL: %lu\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port());
 	}
 
 	void clear()
 	{
-		bzero(values_, 29);
+		bzero(values_, HEADER_LENGTH);
 	}
 
 	Packet()
 	{
-		values_ = new char[29];
+		values_ = new char[HEADER_LENGTH];
 	}
 
 	~Packet()
@@ -95,6 +96,44 @@ private:
 
 struct RoutePacket : Packet
 {
+
+	unsigned int& sequence_number()
+	{
+		return (unsigned int&)values_[HEADER_LENGTH];
+	}
+
+	unsigned int& asn_list(unsigned int i)
+	{
+		if (i < 1 || i > 20)
+			printf("Dangerous! Out of bounds!\n");
+
+		return (unsigned int&)values_[HEADER_LENGTH + i];
+	}
+
+	void print()
+	{
+		printf("type: %c, source: %lu, %d dest: %lu, %d, TTL: %lu, Seq no: %d\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), sequence_number());
+	}
+
+	void clear()
+	{
+		bzero(values_, HEADER_LENGTH + ROUTE_LENGTH);
+	}
+
+
+
+	RoutePacket()
+	{
+		values_ = new char[HEADER_LENGTH + ROUTE_LENGTH];
+	}
+
+	~RoutePacket()
+	{
+		delete values_;
+	}
+
+private:
+	char* values_;
 
 };
 

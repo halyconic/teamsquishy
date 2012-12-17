@@ -145,6 +145,7 @@ int main(int argc, char **argv)
 	printf("Emulator polling on port %d\n\n", port);
 	fflush(stdout);
 	Packet recv_packet;
+	Counter c;
 
 	while (0)
 	{
@@ -157,38 +158,42 @@ int main(int argc, char **argv)
 		/*
 		 * Listen
 		 */
-
-		bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH, flags,
-						(struct sockaddr *) &recv_addr, &addr_len);
-
-		if (debug)
+		while(!c.check())
 		{
-			printf("received packet:\n");
-			recv_packet.print();
-		}
 
-		// Packet received
-		if (bytes_read >= 0)
-		{
-			if (recv_packet.TTL()-- <= 0)
+
+			bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH, flags,
+							(struct sockaddr *) &recv_addr, &addr_len);
+
+			if (debug)
 			{
-				// Drop packet
-				recv_packet.clear();
-
-				if (debug && recv_packet.TTL() < 0)
-				{
-					printf("Error! Should never get here.");
-					exit(1);
-				}
+				printf("received packet:\n");
+				recv_packet.print();
 			}
-			else
-			{
-				recv_packet.TTL()--;
 
-				if (recv_packet.type() == 'T')
+			// Packet received
+			if (bytes_read >= 0)
+			{
+				if (recv_packet.TTL()-- <= 0)
 				{
-					recv_packet.set_source(emulator_address);
-					// Send to next shortest path
+					// Drop packet
+					recv_packet.clear();
+
+					if (debug && recv_packet.TTL() < 0)
+					{
+						printf("Error! Should never get here.");
+						exit(1);
+					}
+				}
+				else
+				{
+					recv_packet.TTL()--;
+
+					if (recv_packet.type() == 'T')
+					{
+						recv_packet.set_source(emulator_address);
+						// Send to next shortest path
+					}
 				}
 			}
 		}

@@ -38,8 +38,8 @@ public:
 	/*
 	 * Recursively copy
 	 */
-	Address true_copy_address(const Address &a);
-	Edge true_copy_edge(const Edge &e);
+	 Address true_copy_address(const Address &a);
+	 Edge true_copy_edge(const Edge &e);
 
 	/*
 	 * Returns the next hop given a destination
