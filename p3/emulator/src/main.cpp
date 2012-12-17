@@ -90,13 +90,6 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Build forwarding table
-	 */
-
-	GraphManager graph_manager = GraphManager(filename, debug);
-	graph_manager.print_network_info(debug);
-
-	/*
 	 * Setup variables
 	 */
 
@@ -137,6 +130,13 @@ int main(int argc, char **argv)
 
 	// Network order
 	Address emulator_address = Address(emulator_addr.sin_addr.s_addr, htons(port));
+
+	/*
+	 * Build forwarding table
+	 */
+
+	GraphManager graph_manager = GraphManager(filename, emulator_address.first, emulator_address.second, debug);
+	graph_manager.print_network_info(debug);
 
 	/*
 	 * Listen for incoming packets
