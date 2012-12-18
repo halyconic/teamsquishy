@@ -103,6 +103,7 @@ int main(int argc, char **argv)
 
 	if (trace_port == 0 || source_port == 0 || destination_port == 0)
 	{
+		printf("trace_port: %u, source_port: %u, destination_port: %u\n", trace_port, source_port, destination_port);
 		printf("Please supply a valid port.\n");
 		return 0;
 	}
@@ -188,6 +189,13 @@ int main(int argc, char **argv)
 	send_addr.sin_addr = *((struct in_addr *)src_ent->h_addr);
 	bzero(&(send_addr.sin_zero), 8);
 
+	if (debug)
+	{
+		printf("Send address: %s %u\n",
+			   inet_ntoa(send_addr.sin_addr),
+			   ntohs(send_addr.sin_port));
+	}
+
 	/*
 	 * Setup packets
 	 */
@@ -211,15 +219,18 @@ int main(int argc, char **argv)
 		/*
 		 * Send
 		 */
+
+
+		sendto(send_sock, send_packet, HEADER_LENGTH, 0,
+				(struct sockaddr *) &send_addr, sizeof(struct sockaddr));
+
 		// TODO Kevin: print out IP and port
 		if (debug)
 		{
 			printf("sending packet:\n");
 			send_packet.print();
+			fflush(stdout);
 		}
-
-		sendto(send_sock, send_packet, HEADER_LENGTH, 0,
-				(struct sockaddr *) &send_addr, sizeof(struct sockaddr));
 
 		/*
 		 * Listen
