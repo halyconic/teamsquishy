@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <boost/graph/breadth_first_search.hpp>
 #include <boost/property_map/property_map.hpp>
 #include <boost/config.hpp>
 #include <arpa/inet.h>
@@ -148,6 +149,53 @@ void GraphManager::create_topology(char* filename, bool debug)
 	num_vertices = line - 2;
 }
 
+void GraphManager::create_forwarding_table(bool debug)
+{
+	using namespace boost;
+
+	typedef property_map<Graph, vertex_index_t>::type IndexMap;
+	    IndexMap index_map = get(vertex_index, graph);
+
+	std::vector<int> p(boost::num_vertices(graph));
+
+	breadth_first_search(graph, index_map[vertex], visitor(
+			make_bfs_visitor(
+					record_predecessors(&p[0], on_tree_edge()))));
+
+	forward_table.clear();
+
+	if (debug)
+		printf("Next hop for each node from %d:\n", vertex);
+
+	graph_traits<Graph>::vertex_iterator vi;
+	for(vi = vertices(graph).first; vi != vertices(graph).second; ++vi)
+	{
+		int d = index_map[*vi];
+		int n = p[*vi];
+
+		if (debug)
+			printf("Dest: %d Hop: %d\n", d, n);
+
+		forward_table.push_back(ForwardEntry(vertex_map[d], vertex_map[n]));
+	}
+
+	if (debug)
+		printf("\n");
+
+	// Verify forwarding table works
+	if (debug)
+	{
+		printf("Forwarding table:\n");
+		std::vector<ForwardEntry>::iterator fp;
+		for (fp = forward_table.begin(); fp != forward_table.end(); ++fp)
+		{
+			// Print each vertex
+			printf("(%lu, %u) (%lu, %u)\n", fp->first.first, fp->first.second, fp->second.first, fp->second.second);
+		}
+		printf("\n");
+	}
+}
+
 GraphManager::GraphManager(char* filename, Address own_address, bool debug)
 {
 	// Create edge list and vertex map
@@ -160,7 +208,6 @@ GraphManager::GraphManager(char* filename, Address own_address, bool debug)
 		printf("Local address does not match node in topology file\n");
 		exit(1);
 	}
-	//vertex = 1;
 
     // declare a graph object
     graph = Graph(num_vertices);
@@ -168,13 +215,26 @@ GraphManager::GraphManager(char* filename, Address own_address, bool debug)
     // add the edges to the graph object
     for (unsigned int i = 0; i < edge_list.size(); ++i)
     	boost::add_edge(edge_list[i].first, edge_list[i].second, graph);
+
+    create_forwarding_table(debug);
 }
 
 Address GraphManager::get_next_hop(Address destination, bool debug)
 {
 	Address hop = Address(0, 0);
 
-	// Set hop here!
+	// Search forwarding table
+	std::vector<ForwardEntry>::iterator fp;
+	for (fp = forward_table.begin(); fp != forward_table.end(); ++fp)
+	{
+		// Set hop, worried about memory here
+		if (fp->first == destination)
+		{
+			if (debug)
+				printf("(%lu, %u) -> (%lu, %u)\n", fp->first.first, fp->first.second, fp->second.first, fp->second.second);
+			hop = fp->second;
+		}
+	}
 
 	return hop;
 }
