@@ -54,13 +54,10 @@ public:
 
 	/*
 	 * Returns the latest sequence number
+	 *
+	 * Outputs to array with routing costs
 	 */
-	int get_next_seq_no();
-
-	/*
-	 * Takes a array and fills the contents with routing costs
-	 */
-	char* output_routes();
+	int output_routes(char* routing_array);
 
 	/*
 	 * Interprets an array and updates the routing table if necessary
