@@ -181,8 +181,29 @@ int main(int argc, char **argv)
 
 	printf("Emulator polling on port %d\n\n", port);
 	fflush(stdout);
-	Packet recv_packet;
+	RoutePacket recv_packet;
+	RoutePacket send_packet;
+
+	send_packet.type() = 'T';
+	send_packet.TTL() = 0;
+	send_packet.set_source(emulator_address);
+
+
 	Counter c;
+	char* route_arrays;
+	int seq_no;
+
+	Address current_hop_address;
+	std::vector<Address> other_hops_vector;
+	int send_sock;
+
+	// Setup port to send on
+	if ((send_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
 
 	while (0)
 	{
@@ -191,6 +212,28 @@ int main(int argc, char **argv)
 		 */
 
 		// createroutes();
+		// forward the packet
+
+		other_hops_vector = graph_manager.get_other_hops(emulator_address, debug);
+
+		// sets up the payload for packet to be sent
+		route_arrays = send_packet.route_array();
+		seq_no = graph_manager.output_routes(route_arrays);
+		send_packet.sequence_number() = seq_no;
+
+		for (int i = 0; i < other_hops_vector.size(); i++)
+		{
+			current_hop_address = other_hops_vector.at(i);
+
+			next_addr.sin_family = AF_INET;
+			next_addr.sin_port = current_hop_address.second;
+			next_addr.sin_addr.s_addr = current_hop_address.first;
+			send_packet.set_destination(current_hop_address);
+			bzero(&(next_addr.sin_zero), 8);
+
+			sendto(send_sock, send_packet, HEADER_LENGTH, 0,
+									(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+		}
 
 		/*
 		 * Listen
@@ -230,7 +273,20 @@ int main(int argc, char **argv)
 					{
 						recv_packet.set_source(emulator_address);
 						// Send to next shortest path
+					} else if (recv_packet.type() == 'R')
+					{
+						// TODO: do something more...
+						printf("packet is of type R...do something cooler\n");
+
+						// forward the packet
+						route_arrays = recv_packet.route_array();
+						seq_no = graph_manager.output_routes(route_arrays);
+						graph_manager.input_routes(seq_no, route_arrays);
+
 					}
+
+
+
 				}
 			}
 		}
