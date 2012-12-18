@@ -37,6 +37,13 @@ private:
 	// Parse file into map and edge list
 	void create_topology(char* filename, bool debug);
 
+
+	/*
+	 * Recursively copy
+	 */
+	 Address true_copy_address(const Address &a);
+	 Edge true_copy_edge(const Edge &e);
+
 	// Reverse lookup address, returns -1 if not found
 	int get_key_from_address(unsigned long int ip_addr, unsigned short int port);
 
@@ -44,6 +51,7 @@ private:
 	void update_table();
 
 public:
+
 
 	/*
 	 * Takes a array and fills the contents with routing costs

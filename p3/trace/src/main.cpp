@@ -211,6 +211,12 @@ int main(int argc, char **argv)
 		/*
 		 * Send
 		 */
+		// TODO Kevin: print out IP and port
+		if (debug)
+		{
+			printf("sending packet:\n");
+			send_packet.print();
+		}
 
 		sendto(send_sock, send_packet, HEADER_LENGTH, 0,
 				(struct sockaddr *) &send_addr, sizeof(struct sockaddr));
@@ -241,9 +247,7 @@ int main(int argc, char **argv)
 		send_packet.TTL()++;
 	}
 
-	/*
-	 * Analyze
-	 */
 
-	// TODO Kevin: print out final statistics
+
+
 }
