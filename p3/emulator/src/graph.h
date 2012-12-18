@@ -52,6 +52,10 @@ private:
 
 public:
 
+	/*
+	 * Returns the latest sequence number
+	 */
+	int get_next_seq_no();
 
 	/*
 	 * Takes a array and fills the contents with routing costs
@@ -61,7 +65,7 @@ public:
 	/*
 	 * Interprets an array and updates the routing table if necessary
 	 */
-	void input_routes(char* routing_array);
+	void input_routes(int seq_no, char* routing_array);
 
 	/*
 	 * Returns the next hop given a destination
