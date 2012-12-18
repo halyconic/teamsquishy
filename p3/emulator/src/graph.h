@@ -17,9 +17,9 @@
 #include "utils.h"
 
 // Each edge is composed of two uniquely identifying addresses
-//typedef std::pair<Address, Address> Edge;
 typedef std::pair<int, int> Edge;
 typedef std::pair<int,Address> Vertex;
+typedef std::pair<Address, Address> ForwardEntry; // destination, next hop
 
 // Create graph with list structure with identical inbound and outbound links
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Graph;
@@ -32,6 +32,7 @@ private:
 	Graph graph;
 	std::map<int,Address> vertex_map;
 	std::vector<Edge> edge_list;
+	std::vector<ForwardEntry> forward_table;
 
 	// Parse file into map and edge list
 	void create_topology(char* filename, bool debug);
@@ -39,7 +40,20 @@ private:
 	// Reverse lookup address, returns -1 if not found
 	int get_key_from_address(unsigned long int ip_addr, unsigned short int port);
 
+	// Updates routing table if any sizes have changed in graph
+	void update_table();
+
 public:
+
+	/*
+	 * Takes a array and fills the contents with routing costs
+	 */
+	char* output_routes();
+
+	/*
+	 * Interprets an array and updates the routing table if necessary
+	 */
+	void input_routes(char* routing_array);
 
 	/*
 	 * Returns the next hop given a destination
@@ -61,7 +75,7 @@ public:
 	/*
 	 * Creates a network graph given a topology file
 	 */
-	GraphManager(char* filename, unsigned long int ip_addr, unsigned short int port, bool debug);
+	GraphManager(char* filename, Address own_address, bool debug);
 };
 
 #endif /* GRAPH_H_ */

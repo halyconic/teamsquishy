@@ -93,11 +93,11 @@ int main(int argc, char **argv)
 	 * Setup variables
 	 */
 
-	int sock;
+	int sock, test_sock;
 	int bytes_read;
 	int flags = MSG_DONTWAIT;
 	socklen_t addr_len;
-	struct sockaddr_in emulator_addr, recv_addr, next_addr;
+	struct sockaddr_in emulator_addr, recv_addr, next_addr, test_addr;
 
 	/*
 	 * Setup socket
@@ -125,17 +125,54 @@ int main(int argc, char **argv)
 	addr_len = sizeof(struct sockaddr);
 
 	/*
-	 * Save own address
+	 * Cache current location
 	 */
 
-	// Network order
-	Address emulator_address = Address(emulator_addr.sin_addr.s_addr, htons(port));
+	if ((test_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+    const char* google_dns_ip = "8.8.8.8";
+    uint16_t dns_port = 53;
+    struct sockaddr_in lookup_serv_addr;
+    memset(&lookup_serv_addr, 0, sizeof(lookup_serv_addr));
+    lookup_serv_addr.sin_family = AF_INET;
+    lookup_serv_addr.sin_addr.s_addr = inet_addr(google_dns_ip);
+    lookup_serv_addr.sin_port = htons(dns_port);
+
+    int err = connect(test_sock, (const sockaddr*) &lookup_serv_addr, sizeof(lookup_serv_addr));
+    // TODO: verify err != -1
+
+    socklen_t namelen = sizeof(test_addr);
+    err = getsockname(test_sock, (sockaddr*) &test_addr, &namelen);
+    // TODO: verify err != -1
+
+    close(test_sock);
+
+    // Set current port
+    test_addr.sin_port = htons(port);
+
+    if (debug)
+	{
+		printf("Own address: %s %u\n",
+			   inet_ntoa(test_addr.sin_addr),
+			   ntohs(test_addr.sin_port));
+	}
+
+    Address emulator_address = Address(
+    		(unsigned long int) test_addr.sin_addr.s_addr,
+    		(unsigned short int) test_addr.sin_port);
+
+	if (debug)
+		printf("Our address: %lu, %u\n\n", emulator_address.first, emulator_address.second);
 
 	/*
 	 * Build forwarding table
 	 */
 
-	GraphManager graph_manager = GraphManager(filename, emulator_address.first, emulator_address.second, debug);
+	GraphManager graph_manager(filename, emulator_address, debug);
 	graph_manager.print_network_info(debug);
 
 	/*

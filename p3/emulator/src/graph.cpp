@@ -97,7 +97,7 @@ void GraphManager::create_topology(char* filename, bool debug)
 				char* temp_port = strtok(0, ",");
 
 				ip_int = inet_addr(temp_ip);
-				port = (unsigned short) strtoul(temp_port, NULL, 0);
+				port = htons((unsigned short) strtoul(temp_port, NULL, 0));
 
 				// Add to vertex list
 				if (j == 0)
@@ -148,19 +148,19 @@ void GraphManager::create_topology(char* filename, bool debug)
 	num_vertices = line - 2;
 }
 
-GraphManager::GraphManager(char* filename, unsigned long int ip_addr, unsigned short int port, bool debug)
+GraphManager::GraphManager(char* filename, Address own_address, bool debug)
 {
 	// Create edge list and vertex map
 	create_topology(filename, debug);
 
 	// Identify itself in network, else quit
-	vertex = get_key_from_address(ip_addr, port);
-//	if (vertex < 0)
-//	{
-//		printf("Local address does not match node in topology file\n");
-//		exit(1);
-//	}
-	vertex = 1;
+	vertex = get_key_from_address(own_address.first, own_address.second);
+	if (vertex < 0)
+	{
+		printf("Local address does not match node in topology file\n");
+		exit(1);
+	}
+	//vertex = 1;
 
     // declare a graph object
     graph = Graph(num_vertices);
