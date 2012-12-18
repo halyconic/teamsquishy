@@ -102,14 +102,6 @@ struct RoutePacket : Packet
 		return (unsigned int&)values_[HEADER_LENGTH];
 	}
 
-//	unsigned int& asn_list(unsigned int i)
-//	{
-//		if (i < 1 || i > 20)
-//			printf("Dangerous! Out of bounds!\n");
-//
-//		return (unsigned int&)values_[HEADER_LENGTH + i];
-//	}
-
 	char* route_array()
 	{
 		return &values_[HEADER_LENGTH + 4];
@@ -125,8 +117,6 @@ struct RoutePacket : Packet
 		bzero(values_, HEADER_LENGTH + ROUTE_LENGTH);
 	}
 
-
-
 	RoutePacket()
 	{
 		values_ = new char[HEADER_LENGTH + ROUTE_LENGTH];
@@ -139,7 +129,6 @@ struct RoutePacket : Packet
 
 private:
 	char* values_;
-
 };
 
 #endif /* PACKET_H_ */
