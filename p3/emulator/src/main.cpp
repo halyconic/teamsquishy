@@ -240,13 +240,8 @@ int main(int argc, char **argv)
 		 */
 		while(!c.check())
 		{
-
-
 			bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH, flags,
 							(struct sockaddr *) &recv_addr, &addr_len);
-
-
-
 
 			// Packet received
 			if (bytes_read >= 0)
@@ -260,8 +255,23 @@ int main(int argc, char **argv)
 
 				if (recv_packet.TTL()-- <= 0)
 				{
-					// Drop packet
-					recv_packet.clear();
+					// Send to routetrace
+					if (recv_packet.type() == 'T')
+					{
+						// Send to next shortest path
+						next_addr.sin_family = AF_INET;
+						next_addr.sin_port = recv_packet.get_source().second;
+						next_addr.sin_addr.s_addr = recv_packet.get_source().first;
+						bzero(&(next_addr.sin_zero), 8);
+
+						sendto(send_sock, recv_packet, HEADER_LENGTH, 0,
+								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+					}
+					else
+					{
+						// Drop packet
+						recv_packet.clear();
+					}
 
 					if (debug && recv_packet.TTL() < 0)
 					{
@@ -277,7 +287,6 @@ int main(int argc, char **argv)
 					{
 						Address current_hop_address = graph_manager.get_next_hop(recv_packet.get_destination(), debug);
 
-						recv_packet.set_source(emulator_address);
 						// Send to next shortest path
 						next_addr.sin_family = AF_INET;
 						next_addr.sin_port = current_hop_address.second;
@@ -286,19 +295,13 @@ int main(int argc, char **argv)
 						bzero(&(next_addr.sin_zero), 8);
 
 						sendto(send_sock, send_packet, HEADER_LENGTH, 0,
-												(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
 					}
 					else if (recv_packet.type() == 'R')
 					{
 						// TODO: do something more...
 						printf("packet is of type R...do something cooler\n");
-
-
-
 					}
-
-
-
 				}
 			}
 		}
