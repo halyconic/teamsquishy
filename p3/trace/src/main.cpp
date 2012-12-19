@@ -254,7 +254,7 @@ int main(int argc, char **argv)
 			recv_packet.print();
 			printf("actual source: %s %u\n\n",
 				   inet_ntoa(recv_addr.sin_addr),
-				   htons(recv_addr.sin_port));
+				   ntohs(recv_addr.sin_port));
 			fflush(stdout);
 		}
 
