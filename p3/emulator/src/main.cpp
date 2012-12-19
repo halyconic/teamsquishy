@@ -258,6 +258,8 @@ int main(int argc, char **argv)
 					// Send to routetrace
 					if (recv_packet.type() == 'T')
 					{
+						recv_packet.TTL() = START_TTL;
+
 						// Send to next shortest path
 						next_addr.sin_family = AF_INET;
 						next_addr.sin_port = recv_packet.get_source().second;
