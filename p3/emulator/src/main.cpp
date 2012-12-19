@@ -266,6 +266,13 @@ int main(int argc, char **argv)
 
 						sendto(send_sock, recv_packet, HEADER_LENGTH, 0,
 								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+
+						if (debug)
+						{
+							printf("sending packet:\n");
+							recv_packet.print();
+							fflush(stdout);
+						}
 					}
 					else
 					{
