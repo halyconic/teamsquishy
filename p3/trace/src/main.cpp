@@ -220,7 +220,6 @@ int main(int argc, char **argv)
 		 * Send
 		 */
 
-
 		sendto(send_sock, send_packet, HEADER_LENGTH, 0,
 				(struct sockaddr *) &send_addr, sizeof(struct sockaddr));
 

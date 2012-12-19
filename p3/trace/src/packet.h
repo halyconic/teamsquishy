@@ -18,7 +18,6 @@ struct Packet
 	{
 		return values_[0];
 	}
-
 	unsigned long int& TTL()
 	{
 		return (unsigned long int&)values_[1];
