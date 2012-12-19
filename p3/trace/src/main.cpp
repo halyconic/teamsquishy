@@ -211,7 +211,7 @@ int main(int argc, char **argv)
 	/*
 	 * Loop
 	 */
-	printf("Routetrace probing form port %d\n\n", trace_port);
+	printf("Routetrace probing from port %d\n\n", trace_port);
 	fflush(stdout);
 
 	for (unsigned int i = 0; i < MAX_RESEND; i++)
@@ -228,6 +228,9 @@ int main(int argc, char **argv)
 		{
 			printf("sending packet:\n");
 			send_packet.print();
+			printf("actual destination: %s %u\n",
+				   inet_ntoa(send_addr.sin_addr),
+				   ntohs(send_addr.sin_port));
 			fflush(stdout);
 		}
 
@@ -249,9 +252,13 @@ int main(int argc, char **argv)
 		{
 			printf("received packet:\n");
 			recv_packet.print();
+			printf("actual source: %s %u\n",
+				   inet_ntoa(recv_addr.sin_addr),
+				   ntohs(recv_addr.sin_port));
 			fflush(stdout);
 		}
 
+		// Possible error!
 		if (recv_packet.get_source() == destination)
 			break;
 
