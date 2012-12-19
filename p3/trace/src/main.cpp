@@ -142,8 +142,16 @@ int main(int argc, char **argv)
 
 	if (debug)
 	{
-		printf("Source address: %s %lu at %d\n", inet_ntoa(*((struct in_addr *)src_ent->h_addr)), source.first, source.second);
-		printf("Destination address: %s %lu at %d\n", inet_ntoa(*((struct in_addr *)src_ent->h_addr)), destination.first, destination.second);
+		printf("Source address: %s %lu at %d\n",
+				inet_ntoa(*((struct in_addr *)src_ent->h_addr)),
+				source.first,
+				ntohs(source.second),
+				source.second);
+		printf("Destination address: %s %lu at %d\n",
+				inet_ntoa(*((struct in_addr *)src_ent->h_addr)),
+				destination.first,
+				ntohs(destination.second),
+				destination.second);
 	}
 
 	/*
