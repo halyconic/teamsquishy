@@ -249,6 +249,7 @@ int main(int argc, char **argv)
 		{
 			printf("received packet:\n");
 			recv_packet.print();
+			fflush(stdout);
 		}
 
 		if (recv_packet.get_source() == destination)
@@ -256,8 +257,4 @@ int main(int argc, char **argv)
 
 		send_packet.TTL()++;
 	}
-
-
-
-
 }

@@ -305,6 +305,13 @@ int main(int argc, char **argv)
 
 						sendto(send_sock, send_packet, HEADER_LENGTH, 0,
 								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+
+						if (debug)
+						{
+							printf("sending packet:\n");
+							send_packet.print();
+							fflush(stdout);
+						}
 					}
 					else if (recv_packet.type() == 'R')
 					{
