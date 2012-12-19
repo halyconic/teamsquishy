@@ -250,9 +250,9 @@ int main(int argc, char **argv)
 				{
 					printf("received packet:\n");
 					recv_packet.print();
-					printf("actual source: %s %u\n",
+					printf("actual source: %s %u\n\n",
 						   inet_ntoa(recv_addr.sin_addr),
-						   ntohs(recv_addr.sin_port));
+						   htons(recv_addr.sin_port));
 					fflush(stdout);
 				}
 
@@ -276,7 +276,7 @@ int main(int argc, char **argv)
 						{
 							printf("sending packet:\n");
 							recv_packet.print();
-							printf("actual destination: %s %u\n",
+							printf("actual destination: %s %u\n\n",
 								   inet_ntoa(next_addr.sin_addr),
 								   ntohs(next_addr.sin_port));
 							fflush(stdout);
@@ -316,7 +316,7 @@ int main(int argc, char **argv)
 						{
 							printf("sending packet:\n");
 							send_packet.print();
-							printf("actual destination: %s %u\n",
+							printf("actual destination: %s %u\n\n",
 								   inet_ntoa(next_addr.sin_addr),
 								   ntohs(next_addr.sin_port));
 							fflush(stdout);
