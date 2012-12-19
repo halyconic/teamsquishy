@@ -71,7 +71,6 @@ struct Packet
 
 	void print()
 	{
-		// TODO Kevin: for debugging!
 		printf("type: %c, source: %lu, %d dest: %lu, %d, TTL: %lu\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port());
 	}
 
@@ -96,7 +95,6 @@ private:
 
 struct RoutePacket : Packet
 {
-
 	unsigned int& sequence_number()
 	{
 		return (unsigned int&)values_[HEADER_LENGTH];
@@ -109,7 +107,10 @@ struct RoutePacket : Packet
 
 	void print()
 	{
-		printf("type: %c, source: %lu, %d dest: %lu, %d, TTL: %lu, Seq no: %d\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), sequence_number());
+		if (type() == 'T')
+			printf("type: %c, source: %lu, %d dest: %lu, %d, TTL: %lu, Seq no: %d\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), sequence_number());
+		else
+			Packet::print();
 	}
 
 	void clear()

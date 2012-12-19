@@ -70,9 +70,7 @@ struct Packet
 
 	void print()
 	{
-		//  Kevin: for debugging!
 		printf("type: %c, source: %lu, %d dest: %lu, %d, TTL: %lu\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port());
-
 	}
 
 	void clear()
