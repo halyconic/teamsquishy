@@ -209,7 +209,7 @@ int main(int argc, char **argv)
 	{
 		/*
 		 * Explore every 4 seconds
-
+		 */
 
 		// createroutes();
 		// forward the packet
@@ -233,7 +233,7 @@ int main(int argc, char **argv)
 
 			sendto(send_sock, send_packet, HEADER_LENGTH, 0,
 									(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
-		}*/
+		}
 
 		/*
 		 * Listen
