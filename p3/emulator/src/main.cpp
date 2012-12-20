@@ -250,13 +250,15 @@ int main(int argc, char **argv)
 				{
 					printf("received packet:\n");
 					recv_packet.print();
-					printf("actual source: %s %u\n\n",
-						   inet_ntoa(recv_addr.sin_addr),
-						   ntohs(recv_addr.sin_port));
+					printf("actual source: %lu %u (%s %u)\n\n",
+							recv_addr.sin_addr.s_addr,
+							recv_addr.sin_port,
+							inet_ntoa(recv_addr.sin_addr),
+							ntohs(recv_addr.sin_port));
 					fflush(stdout);
 				}
 
-				if (recv_packet.TTL()-- <= 0)
+				if (recv_packet.TTL() <= 0)
 				{
 					// Send to routetrace
 					if (recv_packet.type() == 'T')
@@ -269,6 +271,9 @@ int main(int argc, char **argv)
 						next_addr.sin_addr.s_addr = recv_packet.get_source().first;
 						bzero(&(next_addr.sin_zero), 8);
 
+						// Set own address in source field for trace
+						recv_packet.set_source(emulator_address);
+
 						sendto(send_sock, recv_packet, HEADER_LENGTH, 0,
 								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
 
@@ -276,9 +281,11 @@ int main(int argc, char **argv)
 						{
 							printf("sending packet:\n");
 							recv_packet.print();
-							printf("actual destination: %s %u\n\n",
-								   inet_ntoa(next_addr.sin_addr),
-								   ntohs(next_addr.sin_port));
+							printf("actual destination: %lu %u (%s %u)\n\n",
+									next_addr.sin_addr.s_addr,
+									next_addr.sin_port,
+									inet_ntoa(next_addr.sin_addr),
+									ntohs(next_addr.sin_port));
 							fflush(stdout);
 						}
 					}
@@ -302,23 +309,30 @@ int main(int argc, char **argv)
 					{
 						Address current_hop_address = graph_manager.get_next_hop(recv_packet.get_destination(), debug);
 
+						// If node predecessor is yourself send directly to destination
+						if (current_hop_address == emulator_address)
+						{
+							current_hop_address = recv_packet.get_destination();
+						}
+
 						// Send to next shortest path
 						next_addr.sin_family = AF_INET;
 						next_addr.sin_port = current_hop_address.second;
 						next_addr.sin_addr.s_addr = current_hop_address.first;
-						send_packet.set_destination(current_hop_address);
 						bzero(&(next_addr.sin_zero), 8);
 
-						sendto(send_sock, send_packet, HEADER_LENGTH, 0,
+						sendto(send_sock, recv_packet, HEADER_LENGTH, 0,
 								(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
 
 						if (debug)
 						{
 							printf("sending packet:\n");
-							send_packet.print();
-							printf("actual destination: %s %u\n\n",
-								   inet_ntoa(next_addr.sin_addr),
-								   ntohs(next_addr.sin_port));
+							recv_packet.print();
+							printf("actual destination: %lu %u (%s %u)\n\n",
+									next_addr.sin_addr.s_addr,
+									next_addr.sin_port,
+									inet_ntoa(next_addr.sin_addr),
+									ntohs(next_addr.sin_port));
 							fflush(stdout);
 						}
 					}

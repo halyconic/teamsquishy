@@ -112,11 +112,11 @@ int main(int argc, char **argv)
 	 * Setup variables
 	 */
 
-	int recv_sock, send_sock;
+	int recv_sock, send_sock, test_sock;
 	int bytes_read;
 	int flags = MSG_DONTWAIT;
 	socklen_t addr_len;
-	struct sockaddr_in trace_addr, send_addr, recv_addr;
+	struct sockaddr_in trace_addr, send_addr, recv_addr, test_addr;
 	struct hostent *src_ent, *dest_ent;
 
 	/*
@@ -142,13 +142,13 @@ int main(int argc, char **argv)
 
 	if (debug)
 	{
-		printf("Source address: %s %lu at %d\n",
+		printf("Source address: %s %lu at %d %u\n",
 				inet_ntoa(*((struct in_addr *)src_ent->h_addr)),
 				source.first,
 				ntohs(source.second),
 				source.second);
-		printf("Destination address: %s %lu at %d\n",
-				inet_ntoa(*((struct in_addr *)src_ent->h_addr)),
+		printf("Destination address: %s %lu at %d %u\n",
+				inet_ntoa(*((struct in_addr *)dest_ent->h_addr)),
 				destination.first,
 				ntohs(destination.second),
 				destination.second);
@@ -197,11 +197,54 @@ int main(int argc, char **argv)
 	send_addr.sin_addr = *((struct in_addr *)src_ent->h_addr);
 	bzero(&(send_addr.sin_zero), 8);
 
-	if (debug)
+	if (0 && debug)
 	{
 		printf("Send address: %s %u\n",
 			   inet_ntoa(send_addr.sin_addr),
 			   ntohs(send_addr.sin_port));
+	}
+
+	/*
+	 * Cache current location
+	 */
+
+	if ((test_sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	{
+		perror("Socket");
+		exit(1);
+	}
+
+	const char* google_dns_ip = "8.8.8.8";
+	uint16_t dns_port = 53;
+	struct sockaddr_in lookup_serv_addr;
+	memset(&lookup_serv_addr, 0, sizeof(lookup_serv_addr));
+	lookup_serv_addr.sin_family = AF_INET;
+	lookup_serv_addr.sin_addr.s_addr = inet_addr(google_dns_ip);
+	lookup_serv_addr.sin_port = htons(dns_port);
+
+	int err = connect(test_sock, (const sockaddr*) &lookup_serv_addr, sizeof(lookup_serv_addr));
+	// TODO: verify err != -1
+
+	socklen_t namelen = sizeof(test_addr);
+	err = getsockname(test_sock, (sockaddr*) &test_addr, &namelen);
+	// TODO: verify err != -1
+
+	close(test_sock);
+
+	// Set current port
+	test_addr.sin_port = htons(trace_port);
+
+	Address trace_address = Address(
+			(unsigned long int) test_addr.sin_addr.s_addr,
+			(unsigned short int) test_addr.sin_port);
+
+	if (debug)
+	{
+		printf("Trace address: %s %lu at %d %u\n",
+				inet_ntoa(test_addr.sin_addr),
+				trace_address.first,
+				ntohs(test_addr.sin_port),
+				trace_address.second);
 	}
 
 	/*
@@ -211,7 +254,7 @@ int main(int argc, char **argv)
 	Packet send_packet;
 	send_packet.type() = 'T';
 	send_packet.TTL() = 0;
-	send_packet.set_source(source);
+	send_packet.set_source(trace_address);
 	send_packet.set_destination(destination);
 
 	Packet recv_packet;
@@ -236,9 +279,11 @@ int main(int argc, char **argv)
 		{
 			printf("sending packet:\n");
 			send_packet.print();
-			printf("actual destination: %s %u\n\n",
-				   inet_ntoa(send_addr.sin_addr),
-				   ntohs(send_addr.sin_port));
+			printf("actual destination: %lu %u (%s %u)\n\n",
+					send_addr.sin_addr.s_addr,
+					send_addr.sin_port,
+					inet_ntoa(send_addr.sin_addr),
+					ntohs(send_addr.sin_port));
 			fflush(stdout);
 		}
 
@@ -260,9 +305,11 @@ int main(int argc, char **argv)
 		{
 			printf("received packet:\n");
 			recv_packet.print();
-			printf("actual source: %s %u\n\n",
-				   inet_ntoa(recv_addr.sin_addr),
-				   ntohs(recv_addr.sin_port));
+			printf("actual source: %lu %u (%s %u)\n\n",
+					recv_addr.sin_addr.s_addr,
+					recv_addr.sin_port,
+					inet_ntoa(recv_addr.sin_addr),
+					ntohs(recv_addr.sin_port));
 			fflush(stdout);
 		}
 
