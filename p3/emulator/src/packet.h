@@ -121,6 +121,14 @@ struct RoutePacket : Packet
 		}
 	}
 
+	void set_routes_infinity()
+	{
+		for (unsigned int i = 0; i < 20; ++i)
+		{
+			route_array()[i] = -1;
+		}
+	}
+
 	void clear()
 	{
 		bzero(values_, HEADER_LENGTH + ROUTE_LENGTH);
