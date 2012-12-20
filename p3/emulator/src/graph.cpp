@@ -267,6 +267,13 @@ std::vector<Address> GraphManager::get_other_hops(Address source, bool debug)
 	return hops;
 }
 
+/*
+	 * Returns the latest sequence number
+	 *
+	 * Outputs to array with routing costs
+	 */
+	int GraphManager::output_routes(char* routing_array);
+
 void GraphManager::print_network_info(bool debug)
 {
 	/*

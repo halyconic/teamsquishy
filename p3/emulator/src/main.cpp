@@ -217,8 +217,8 @@ int main(int argc, char **argv)
 		other_hops_vector = graph_manager.get_other_hops(emulator_address, debug);
 
 		// sets up the payload for packet to be sent
-		route_arrays = send_packet.route_array();
-		seq_no = graph_manager.output_routes(route_arrays);
+		char* route_array = send_packet.route_array();
+		graph_manager.output_routes(route_array);
 		send_packet.sequence_number() = seq_no;
 
 		for (int i = 0; i < other_hops_vector.size(); i++)
@@ -339,7 +339,22 @@ int main(int argc, char **argv)
 					else if (recv_packet.type() == 'R')
 					{
 						// TODO: do something more...
-						printf("packet is of type R...do something cooler\n");
+						printf("received packet type R\n");
+
+						// check to see if seq no is old
+						if (recv_packet.sequence_number() <= seq_no)
+						{
+							// do nothing
+						}
+						else
+						{
+							// send out packet of all infinity
+
+							// increment sequence number
+
+							// send packet to each neighbor
+
+						}
 					}
 				}
 			}
