@@ -210,7 +210,6 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-
 	while (1)
 	{
 		switch (c.check())
@@ -266,7 +265,7 @@ int main(int argc, char **argv)
 				send_packet.set_destination(current_hop_address);
 				bzero(&(next_addr.sin_zero), 8);
 
-				sendto(send_sock, send_packet, HEADER_LENGTH, 0,
+				sendto(send_sock, send_packet, HEADER_LENGTH + ROUTE_LENGTH, 0,
 						(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
 
 				if (debug)
@@ -430,7 +429,7 @@ int main(int argc, char **argv)
 							dirty_routing_table = true;
 						}
 					}
-					else if (0 && recv_packet.type() == 'P')
+					else if (recv_packet.type() == 'P')
 					{
 						// TODO: Add edge to graph
 						graph_manager.set_port_open(recv_packet.get_source());

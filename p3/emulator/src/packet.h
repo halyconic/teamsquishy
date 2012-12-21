@@ -115,7 +115,7 @@ struct RoutePacket : Packet
 	{
 		if (type() == 'R')
 		{
-			printf("type: %c, TTL: %lu source: %lu, %d dest: %lu, %d sequence no: %u\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), sequence_number());
+			printf("type: %c, TTL: %lu source: %lu, %d dest: %lu, %d sequence no: %u\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), values_[HEADER_LENGTH]);
 			printf("%d:", node());
 			for (int i = 0; i < 10; ++i)
 			{
