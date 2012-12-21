@@ -63,16 +63,24 @@ public:
 	void set_port_open(Address address);
 
 	/*
-	 * Returns the latest sequence number
-	 *
+	 * Update port with graphs
+	 */
+	void update_graph_with_open_ports();
+
+	/*
+	 * Recalculate as needed
+	 */
+	void recalculate(bool debug);
+
+	/*
 	 * Outputs to array with routing costs
 	 */
-	void output_routes(int &seq_no, int &node, char* routing_array);
+	void output_routes(int &node, int* routing_array);
 
 	/*
 	 * Interprets an array and updates the routing table if necessary
 	 */
-	void input_routes(int &seq_no, int &node, char* routing_array);
+	void input_routes(int node, int* routing_array);
 
 	/*
 	 * Returns the next hop given a destination

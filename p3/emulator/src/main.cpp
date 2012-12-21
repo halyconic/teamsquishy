@@ -185,8 +185,8 @@ int main(int argc, char **argv)
 	RoutePacket send_packet;
 	Packet ping_packet;
 
-	send_packet.type() = 'T';
-	send_packet.TTL() = 0;
+	send_packet.type() = 'R';
+	send_packet.TTL() = START_TTL;
 	send_packet.set_source(emulator_address);
 
 	ping_packet.type() = 'P';
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
 				sendto(send_sock, ping_packet, HEADER_LENGTH, 0,
 						(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
 
-				if (debug)
+				if (0 && debug)
 				{
 					printf("sending packet:\n");
 					ping_packet.print();
@@ -248,32 +248,48 @@ int main(int argc, char **argv)
 		}
 		case EXPLORE:
 		{
-//			other_hops_vector = graph_manager.get_other_hops(emulator_address, debug);
-//
-//			// sets up the payload for packet to be sent
-//			seq_no++;
-//			//char* route_array = send_packet.route_array();
-//			//graph_manager.output_routes(route_array);
-//			send_packet.sequence_number() = seq_no;
-//
-//			for (unsigned int i = 0; i < other_hops_vector.size(); i++)
-//			{
-//				current_hop_address = other_hops_vector.at(i);
-//
-//				next_addr.sin_family = AF_INET;
-//				next_addr.sin_port = current_hop_address.second;
-//				next_addr.sin_addr.s_addr = current_hop_address.first;
-//				send_packet.set_destination(current_hop_address);
-//				bzero(&(next_addr.sin_zero), 8);
-//
-//				sendto(send_sock, send_packet, HEADER_LENGTH, 0,
-//										(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
-//			}
+			other_hops_vector = graph_manager.get_other_hops(emulator_address, debug);
+
+			seq_no++;
+
+			// sets up the payload for packet to be sent
+			//graph_manager.output_routes(send_packet.node(), send_packet.route_array());
+			send_packet.sequence_number() = seq_no;
+
+			for (unsigned int i = 0; i < other_hops_vector.size(); i++)
+			{
+				current_hop_address = other_hops_vector.at(i);
+
+				next_addr.sin_family = AF_INET;
+				next_addr.sin_port = current_hop_address.second;
+				next_addr.sin_addr.s_addr = current_hop_address.first;
+				send_packet.set_destination(current_hop_address);
+				bzero(&(next_addr.sin_zero), 8);
+
+				sendto(send_sock, send_packet, HEADER_LENGTH, 0,
+						(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+
+				if (debug)
+				{
+					printf("sending packet:\n");
+					send_packet.print();
+					printf("actual destination: %lu %u (%s %u)\n\n",
+							next_addr.sin_addr.s_addr,
+							next_addr.sin_port,
+							inet_ntoa(next_addr.sin_addr),
+							ntohs(next_addr.sin_port));
+					fflush(stdout);
+				}
+
+				// TODO: update more efficiently
+				//graph_manager.input_routes(send_packet.node(), send_packet.route_array());
+				dirty_routing_table = true;
+			}
 			break;
 		}
 		case LISTEN:
 		{	
-			bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH, flags,
+			bytes_read = recvfrom(sock, recv_packet, HEADER_LENGTH + ROUTE_LENGTH, flags,
 							(struct sockaddr *) &recv_addr, &addr_len);
 
 			// Packet received
@@ -391,7 +407,8 @@ int main(int argc, char **argv)
 						{
 							seq_no = recv_packet.sequence_number();
 
-							// TODO: update own array
+							// Make this more efficient
+							//graph_manager.input_routes(recv_packet.node(), recv_packet.route_array());
 
 							// Retransmit packet everywhere
 							other_hops_vector = graph_manager.get_other_hops(emulator_address, debug);
@@ -405,16 +422,18 @@ int main(int argc, char **argv)
 								recv_packet.set_destination(current_hop_address);
 								bzero(&(next_addr.sin_zero), 8);
 
-								sendto(send_sock, recv_packet, HEADER_LENGTH, 0,
+								sendto(send_sock, recv_packet, HEADER_LENGTH + ROUTE_LENGTH, 0,
 										(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
 							}
 
-							// TODO: Check if queue is empty. If so, run dijkstra's
+							// TODO: set dirty bit if necessary, not all the time
+							dirty_routing_table = true;
 						}
 					}
-					else if (recv_packet.type() == 'P')
+					else if (0 && recv_packet.type() == 'P')
 					{
 						// TODO: Add edge to graph
+						graph_manager.set_port_open(recv_packet.get_source());
 
 						// Send to back to sender
 						next_addr.sin_family = AF_INET;
@@ -427,6 +446,19 @@ int main(int argc, char **argv)
 					}
 				}
 			}
+
+			// If routing table is dirty and no more packets need reading, update
+			if (dirty_routing_table)
+			{
+				bytes_read = recvfrom(sock, recv_packet, 0, MSG_PEEK + MSG_DONTWAIT,
+						(struct sockaddr *) &recv_addr, &addr_len);
+				if (bytes_read < 0)
+				{
+					graph_manager.recalculate(debug);
+				}
+				dirty_routing_table = false;
+			}
+
 			break;
 		}
 		default:

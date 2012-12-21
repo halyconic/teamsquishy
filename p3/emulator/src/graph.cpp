@@ -277,13 +277,46 @@ std::vector<Address> GraphManager::get_other_hops(Address source, bool debug)
 }
 
 /*
- * Returns the latest sequence number
- *
- * Outputs to array with routing costs
+ * Outputs open ports to array
  */
-void GraphManager::output_routes(int &seq_no, int &node, char* routing_array)
+void GraphManager::output_routes(int &node, int* routing_array)
 {
+	node = vertex;
 
+	unsigned int routing_iter = 0;
+
+	for (unsigned int i = 0; i < ports.size(); ++i)
+	{
+		if (ports[i].second == true)
+		{
+			routing_array[routing_iter] = ports[i].first;
+			++i;
+		}
+	}
+}
+
+void GraphManager::input_routes(int node, int* routing_array)
+{
+	using namespace boost;
+
+	typedef property_map<Graph, vertex_index_t>::type IndexMap;
+	    IndexMap index_map = get(vertex_index, graph);
+
+	typedef graph_traits<Graph>::vertex_iterator vertex_iter;
+
+	printf("vertex %d", vertex);
+
+	// TODO: does this work?
+	clear_vertex(node, graph);
+
+	print_network_info(true);
+
+//	for (unsigned int i = 0; routing_array[i] != 0; ++i)
+//	{
+//		add_edge(node, routing_array[i], graph);
+//	}
+//
+//	print_network_info(true);
 }
 
 std::vector<Address> GraphManager::get_port_addresses()
@@ -313,6 +346,11 @@ void GraphManager::set_port_open(Address address)
 			break;
 		}
 	}
+}
+
+void GraphManager::recalculate(bool debug)
+{
+	create_forwarding_table(debug);
 }
 
 void GraphManager::print_network_info(bool debug)

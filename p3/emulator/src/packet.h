@@ -11,7 +11,7 @@
 #include "utils.h"
 
 const int HEADER_LENGTH = 29;
-const int ROUTE_LENGTH = 21*4;
+const int ROUTE_LENGTH = 22*4;
 
 struct Packet
 {
@@ -101,19 +101,27 @@ struct RoutePacket : Packet
 		return (unsigned int&)values_[HEADER_LENGTH];
 	}
 
-	char* route_array()
+	int& node()
 	{
-		return &values_[HEADER_LENGTH + 4];
+		return (int&)values_[HEADER_LENGTH + 4];
+	}
+
+	int* route_array()
+	{
+		return (int*)&values_[HEADER_LENGTH + 8];
 	}
 
 	void print()
 	{
 		if (type() == 'R')
 		{
-			printf("type: %c, TTL: %lu source: %lu, %d dest: %lu, %d sequence no: %d\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), sequence_number());
-			//printf("(%s, %d) -> (%s, %d)\n",
-				//	inet_ntoa((struct in_addr)src_ip_addr()), ntohs(src_port()),
-					//inet_ntoa(*((struct in_addr *)dest_ip_addr())), ntohs(dest_port()));
+			printf("type: %c, TTL: %lu source: %lu, %d dest: %lu, %d sequence no: %u\n", type(), TTL(), src_ip_addr(), src_port(), dest_ip_addr(), dest_port(), sequence_number());
+			printf("%d:", node());
+			for (int i = 0; i < 10; ++i)
+			{
+				printf(" %d", route_array()[i]);
+			}
+			printf("\n");
 		}
 		else
 		{

@@ -309,7 +309,8 @@ int main(int argc, char **argv)
 					recv_addr.sin_addr.s_addr,
 					recv_addr.sin_port,
 					inet_ntoa(recv_addr.sin_addr),
-					ntohs(recv_addr.sin_port));
+//					ntohs(recv_addr.sin_port));
+					ntohs(recv_packet.get_source().second));
 			fflush(stdout);
 		}
 
@@ -319,4 +320,6 @@ int main(int argc, char **argv)
 
 		send_packet.TTL()++;
 	}
+
+	printf("Trace finished!\n");
 }
