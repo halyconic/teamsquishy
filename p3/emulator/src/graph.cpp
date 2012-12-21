@@ -304,13 +304,13 @@ void GraphManager::input_routes(int node, int* routing_array)
 
 	typedef graph_traits<Graph>::vertex_iterator vertex_iter;
 
-	printf("vertex %d", vertex);
-
-	// TODO: does this work?
-	clear_vertex(node, graph);
-
-	print_network_info(true);
-
+//	printf("vertex %d", vertex);
+//
+//	// TODO: does this work?
+//	clear_vertex(node, graph);
+//
+//	print_network_info(true);
+//
 //	for (unsigned int i = 0; routing_array[i] != 0; ++i)
 //	{
 //		add_edge(node, routing_array[i], graph);

@@ -247,43 +247,43 @@ int main(int argc, char **argv)
 		}
 		case EXPLORE:
 		{
-			other_hops_vector = graph_manager.get_other_hops(emulator_address, debug);
-
-			seq_no++;
-
-			// sets up the payload for packet to be sent
-			//graph_manager.output_routes(send_packet.node(), send_packet.route_array());
-			send_packet.sequence_number() = seq_no;
-
-			for (unsigned int i = 0; i < other_hops_vector.size(); i++)
-			{
-				current_hop_address = other_hops_vector.at(i);
-
-				next_addr.sin_family = AF_INET;
-				next_addr.sin_port = current_hop_address.second;
-				next_addr.sin_addr.s_addr = current_hop_address.first;
-				send_packet.set_destination(current_hop_address);
-				bzero(&(next_addr.sin_zero), 8);
-
-				sendto(send_sock, send_packet, HEADER_LENGTH + ROUTE_LENGTH, 0,
-						(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
-
-				if (debug)
-				{
-					printf("sending packet:\n");
-					send_packet.print();
-					printf("actual destination: %lu %u (%s %u)\n\n",
-							next_addr.sin_addr.s_addr,
-							next_addr.sin_port,
-							inet_ntoa(next_addr.sin_addr),
-							ntohs(next_addr.sin_port));
-					fflush(stdout);
-				}
-
-				// TODO: update more efficiently
-				//graph_manager.input_routes(send_packet.node(), send_packet.route_array());
-				dirty_routing_table = true;
-			}
+//			other_hops_vector = graph_manager.get_other_hops(emulator_address, debug);
+//
+//			seq_no++;
+//
+//			// sets up the payload for packet to be sent
+//			//graph_manager.output_routes(send_packet.node(), send_packet.route_array());
+//			send_packet.sequence_number() = seq_no;
+//
+//			for (unsigned int i = 0; i < other_hops_vector.size(); i++)
+//			{
+//				current_hop_address = other_hops_vector.at(i);
+//
+//				next_addr.sin_family = AF_INET;
+//				next_addr.sin_port = current_hop_address.second;
+//				next_addr.sin_addr.s_addr = current_hop_address.first;
+//				send_packet.set_destination(current_hop_address);
+//				bzero(&(next_addr.sin_zero), 8);
+//
+//				sendto(send_sock, send_packet, HEADER_LENGTH + ROUTE_LENGTH, 0,
+//						(struct sockaddr *) &next_addr, sizeof(struct sockaddr));
+//
+//				if (debug)
+//				{
+//					printf("sending packet:\n");
+//					send_packet.print();
+//					printf("actual destination: %lu %u (%s %u)\n\n",
+//							next_addr.sin_addr.s_addr,
+//							next_addr.sin_port,
+//							inet_ntoa(next_addr.sin_addr),
+//							ntohs(next_addr.sin_port));
+//					fflush(stdout);
+//				}
+//
+//				// TODO: update more efficiently
+//				//graph_manager.input_routes(send_packet.node(), send_packet.route_array());
+//				dirty_routing_table = true;
+//			}
 			break;
 		}
 		case LISTEN:
