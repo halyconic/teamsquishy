@@ -189,7 +189,7 @@ int main(int argc, char **argv)
 	send_packet.TTL() = 0;
 	send_packet.set_source(emulator_address);
 
-	send_packet.type() = 'P';
+	ping_packet.type() = 'P';
 	ping_packet.TTL() = 2;
 	ping_packet.set_source(emulator_address);
 

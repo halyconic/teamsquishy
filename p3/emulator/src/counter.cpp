@@ -25,22 +25,22 @@ COUNTER_STATE Counter::check()
 	struct timeval time_elapsed;
 
 	gettimeofday(&curr_time, NULL);
-	time_elapsed.tv_usec = curr_time.tv_usec - last_time.tv_usec;
+	timersub(&curr_time, &last_time, &time_elapsed);
 
 	if (explore)
 	{
 		// wait (time_to_wait - time_elapsed_millisec)
-		if (listen_time.tv_usec > time_elapsed.tv_usec)
-			return PING;
+		if (timercmp(&listen_time, &time_elapsed, >))
+			return LISTEN;
 
 		explore = false;
 		gettimeofday(&last_time, NULL);
-		return LISTEN;
+		return PING;
 	}
 	else
 	{
 		// wait (time_to_wait - time_elapsed_millisec)
-		if (timeout_time.tv_usec > time_elapsed.tv_usec)
+		if (timercmp(&timeout_time, &time_elapsed, >))
 			return LISTEN;
 
 		explore = true;
