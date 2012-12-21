@@ -267,10 +267,13 @@ std::vector<Address> GraphManager::get_other_hops(Address source, bool debug)
 			printf(" %d", key);
 
 		hops.push_back(vertex_map[key]);
+		printf("Address %d: %lu, %d", ai, hops.back().first, hops.back().second);
 	}
 
 	if (debug)
 		printf("\n");
+
+
 
 	// Could have memory issues if vertex_map is deleted while being used
 	return hops;
