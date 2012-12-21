@@ -10,17 +10,28 @@
 
 #include <sys/time.h>
 
+enum COUNTER_STATE
+{
+	PING,
+	EXPLORE,
+	LISTEN
+};
+
 class Counter
 {
+private:
+	bool explore;
+
 public:
 	// Time to wait in seconds
-	Counter(unsigned short int wait_time = 4);
+	Counter(unsigned short int listen_time = 3, unsigned short int timeout_time = 1);
 
-	// Return true and reset last_time if timeout has expired
-	bool check();
+	// Return state and reset last_time if timeout has expired
+	COUNTER_STATE check();
 
 	struct timeval last_time;
-	struct timeval wait_time;
+	struct timeval listen_time;
+	struct timeval timeout_time;
 };
 
 #endif /* COUNTER_H_ */

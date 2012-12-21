@@ -209,6 +209,15 @@ GraphManager::GraphManager(char* filename, Address own_address, bool debug)
 		exit(1);
 	}
 
+	// Add emulated port that pings can occur across
+	for (unsigned int i = 0; i < edge_list.size(); ++i)
+	{
+		if (edge_list[i].first == vertex)
+			ports.push_back(std::pair<int, bool>(edge_list[i].second, false));
+		else if (edge_list[i].second == vertex)
+			ports.push_back(std::pair<int, bool>(edge_list[i].first, false));
+	}
+
     // declare a graph object
     graph = Graph(num_vertices);
 
@@ -272,9 +281,38 @@ std::vector<Address> GraphManager::get_other_hops(Address source, bool debug)
  *
  * Outputs to array with routing costs
  */
-int GraphManager::output_routes(char* routing_array)
+void GraphManager::output_routes(int &seq_no, int &node, char* routing_array)
 {
 
+}
+
+std::vector<Address> GraphManager::get_port_addresses()
+{
+	std::vector<Address> port_addresses;
+
+	for (unsigned int i = 0; i < ports.size(); ++i)
+	{
+		ports[i].second = false;
+		port_addresses.push_back(vertex_map[ports[i].first]);
+	}
+
+	return port_addresses;
+}
+
+void GraphManager::set_port_open(Address address)
+{
+	int key = get_key_from_address(address.first, address.second);
+
+	for (unsigned int i = 0; i < ports.size(); ++i)
+	{
+		if (ports[i].first == key)
+		{
+			ports[i].second = true;
+
+			// One match only
+			break;
+		}
+	}
 }
 
 void GraphManager::print_network_info(bool debug)

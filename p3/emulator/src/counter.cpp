@@ -9,14 +9,17 @@
 #include <stdio.h>
 #include <unistd.h>
 
-Counter::Counter(unsigned short int w)
+Counter::Counter(unsigned short int w, unsigned short int v)
 {
-	wait_time.tv_sec = w;
-	wait_time.tv_usec = 0;
+	bool explore = true;
+	listen_time.tv_sec = w;
+	listen_time.tv_usec = 0;
+	timeout_time.tv_sec = v;
+	timeout_time.tv_usec = 0;
 	gettimeofday(&last_time, NULL);
 }
 
-bool Counter::check()
+COUNTER_STATE Counter::check()
 {
 	struct timeval curr_time;
 	struct timeval time_elapsed;
@@ -24,10 +27,24 @@ bool Counter::check()
 	gettimeofday(&curr_time, NULL);
 	time_elapsed.tv_usec = curr_time.tv_usec - last_time.tv_usec;
 
-	// wait (time_to_wait - time_elapsed_millisec)
-	if (wait_time.tv_usec > time_elapsed.tv_usec)
-		return false;
+	if (explore)
+	{
+		// wait (time_to_wait - time_elapsed_millisec)
+		if (listen_time.tv_usec > time_elapsed.tv_usec)
+			return PING;
 
-	gettimeofday(&last_time, NULL);
-	return true;
+		explore = false;
+		gettimeofday(&last_time, NULL);
+		return LISTEN;
+	}
+	else
+	{
+		// wait (time_to_wait - time_elapsed_millisec)
+		if (timeout_time.tv_usec > time_elapsed.tv_usec)
+			return LISTEN;
+
+		explore = true;
+		gettimeofday(&last_time, NULL);
+		return EXPLORE;
+	}
 }
